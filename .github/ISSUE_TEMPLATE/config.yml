@@ -1,5 +1,36 @@
-blank_issues_enabled: false
+# Issue routing for the meshly.ai soft fork.
+#
+# Adapted from Josee9988/project-template (MIT) — see .github/ATTRIBUTION.md.
+# Two deliberate changes from both the template and upstream's version:
+#
+#   blank_issues_enabled: TRUE. Upstream set it false. On a fork whose main job
+#   is redirecting people to the right repository, a reporter who does not fit
+#   any template needs a way to say so rather than being forced into the wrong
+#   one — or giving up.
+#
+#   The contact links point UPSTREAM, not at a maintainer's personal account.
+#   Upstream's config sent reporters to the author's Mastodon; the template's
+#   sent them to its author's personal email. Neither is right here: almost
+#   every report about this software belongs upstream, and the fork's own
+#   surface is small and named explicitly in CONTRIBUTING.md.
+blank_issues_enabled: true
 contact_links:
-  - name: Contact me on Mastodon
-    url: https://fosstodon.org/@cyclenerd
-    about: Feel free to follow me on Mastodon and send me a message
+  - name: "🏠 Report a bug or request a feature in the PROJECT (do this first)"
+    url: https://github.com/Cyclenerd/google-cloud-github-runner/issues
+    about: >-
+      This repository is a fork. Anything about the runner manager itself —
+      webhooks, VM lifecycle, runner registration, GitHub App setup, the
+      Terraform under gcp/, the Dockerfile, dependencies — belongs upstream,
+      where a fix reaches everyone running this tool. We will redirect you here
+      otherwise, which costs us both a round trip.
+  - name: "🔐 Report a security vulnerability (never in a public issue)"
+    url: https://github.com/Meshly-Open-Source/google-cloud-github-runner/security/advisories/new
+    about: >-
+      Private vulnerability reporting for the paths this fork adds. If the issue
+      is in upstream's code, follow upstream's SECURITY.md instead. See
+      SECURITY.md for which is which.
+  - name: "📖 What this fork is, and what it adds"
+    url: https://github.com/Meshly-Open-Source/google-cloud-github-runner#readme
+    about: >-
+      Read this before filing: it lists exactly which paths are ours, and says
+      plainly that everything the fork adds was written by an AI agent.
