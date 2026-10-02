@@ -25,8 +25,8 @@ go upstream.
 ## ⚠️ AI-generated code disclosure
 
 **Everything this fork adds was written by an AI coding agent** (Claude), under
-human direction and review. That covers all of `ipfilter/`, all of `docs/`, and
-this README, `CONTRIBUTING.md` and `SECURITY.md`. Treat it accordingly:
+human direction and review. That covers every path this fork
+adds, and the fork-facing documentation including this README. Treat it accordingly:
 
 * **Upstream's code is not affected.** The fork modifies no path upstream owns,
   so nothing generated here has touched the application. That is verified
@@ -35,11 +35,11 @@ this README, `CONTRIBUTING.md` and `SECURITY.md`. Treat it accordingly:
 * **Agents: read [`AGENTS-LOCAL.md`](AGENTS-LOCAL.md) before editing anything
   here.** It is repo-wide and states the read-only boundary, how to route a
   change, and what must never be included in an upstream pull request.
-* **Review it before you trust it.** `ipfilter/` is a fail-closed access
-  control, which is exactly the category where plausible-looking wrong code is
-  most expensive: a bug does not misbehave, it denies every caller, and that
-  looks indistinguishable from a quiet day. Read the tests — they are the
-  claim — and do not deploy it on our say-so.
+* **Review it before you trust it.** Some of it is access-control code, which
+  is exactly the category where plausible-looking wrong code is most expensive:
+  a bug does not misbehave, it denies every caller, and that looks
+  indistinguishable from a quiet day. Read the tests — they are the claim — and
+  do not deploy any of it on our say-so.
 * **What was actually verified**, so you can judge the rest: the test suite
   passes, it is `flake8`-clean under upstream's own rules, and twelve
   deliberate mutations of the implementation each turn the suite red (wrong
@@ -62,7 +62,7 @@ accounting.
 
 | | Change | Path |
 |---|---|---|
-| ➕ | **Framework-agnostic IP allowlist** — a pure policy core plus WSGI and ASGI adapters. Stdlib only, no web framework in the core, and no address ranges anywhere in the package. | [`ipfilter/`](ipfilter/) |
+| ➕ | **IP allowlist** — a policy core plus WSGI and ASGI adapters, stdlib-only, framework-free, no address ranges baked in. Not wired into the application. | [`ipfilter/`](ipfilter/) |
 | ➕ | **Self-hosting notes** — Artifact Registry layout and Cloud Build caching for running your own build of the manager image. | [`docs/`](docs/) |
 | ➕ | **Agent instructions** — repo-wide rules for AI agents working here, plus a machine-readable manifest. | [`AGENTS-LOCAL.md`](AGENTS-LOCAL.md), [`RUNNER.xml`](RUNNER.xml) |
 | ✏️ | This file, [`CONTRIBUTING.md`](CONTRIBUTING.md), [`SECURITY.md`](SECURITY.md) and [`AGENTS.md`](AGENTS.md), to say what the fork is and where to send patches. | — |
@@ -106,7 +106,7 @@ blobs can be declared, so no amount of editing the baseline can add `app/` or
 2. Carrying a **patch series** against upstream, or a merge of upstream changes
    we rewrote. A bump stops being a fast-forward.
 3. Our additions acquiring **dependencies** upstream does not have.
-4. `ipfilter/` becoming **load-bearing for the application** rather than
+4. Any addition becoming **load-bearing for the application** rather than
    something a deployment composes in.
 5. Offering nothing upstream. A soft fork that never sends anything back is
    just a slow hard fork.
@@ -140,33 +140,17 @@ individually and pinned, so editing one *again* fails the check until it is
 re-baselined, and a non-`.md` or nested path cannot be declared at all. That
 last restriction is the one that actually protects `app/`.
 
-## `ipfilter/`
+## The added packages
 
-Built to be given away. It is named for what it does rather than for us, takes
-no dependency on this application, and imports no web framework, so the offer
-to upstream is "add exactly this directory" — no renames, no imports to
-unpick.
+Each addition is self-contained, vendor-neutral, and built to be given away:
+named for what it does rather than for us, no dependency on our deployment, and
+no import of this application — so the offer upstream is "add exactly this
+directory". None of them is wired into the runner manager; enabling one is a
+composition step a deployment performs for itself, which is why upstream's
+`app/` never has to move.
 
-Three deliberate properties, each of which is a mistake we wanted to make
-impossible:
-
-* **No address ranges in the package.** A library that ships a default range
-  set turns one consumer's allowlist into a silent default for every future
-  consumer. The consumer supplies named sets; a policy naming a set the
-  consumer did not supply is *unevaluable*, and under fail-closed that denies.
-* **Three decisions, not two** — allow, deny, **unevaluable**. "This caller is
-  not on the list" and "I do not have a list" have opposite implications and
-  different fixes, and a single `denied` counter conflates them. The collapse
-  to a block happens at the enforcement edge, as a configured fail mode, with
-  the reason preserved in the record.
-* **Every route explicit, including "no check".** A table that covers the
-  routes it knows about and lets the rest through is an inclusion list, and it
-  fails open on the route added next week by someone who never read it. An
-  uncovered route is a **startup failure**; a route that genuinely takes no
-  address check is declared as such and must carry a written justification.
-
-Design notes are in [`ipfilter/__init__.py`](ipfilter/__init__.py). What is
-actually guaranteed is in [`ipfilter/tests/`](ipfilter/tests/):
+Each carries its own design notes and its own proof command in its directory.
+For the IP allowlist that is [`ipfilter/__init__.py`](ipfilter/__init__.py) and:
 
 ```bash
 python -m pytest -c ipfilter/pytest.ini ipfilter/tests
@@ -179,13 +163,13 @@ run picks up the project's own suite instead.
 ## Contributing
 
 **Upstream first** — <https://github.com/Cyclenerd/google-cloud-github-runner/issues>.
-For `ipfilter/` and `docs/` only, this fork's own tracker is open:
+For this fork's own paths, its tracker is open:
 <https://github.com/jw409/google-cloud-github-runner/issues>.
 A fix landed upstream reaches everyone running this tool, including us; a fix
 landed here strands you on a fork. We will not merge a change that should have
 gone upstream.
 
-Changes to `ipfilter/` or `docs/` are welcome here, since they have nowhere
+Changes to the paths this fork adds are welcome here, since they have nowhere
 upstream to go yet. See [CONTRIBUTING.md](CONTRIBUTING.md) for how we evaluate
 them, including the priority order, stated plainly.
 

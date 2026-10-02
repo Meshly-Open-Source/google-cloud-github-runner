@@ -83,8 +83,8 @@ blob hash. That is soft on code and *medium* on documentation. If you add a
 fifth, update the count here and in `README.md` — a stale count is how
 "we barely touch upstream" survives past the point of being true.
 
-**Where to file things.** Issues are enabled on this fork, scoped to
-`ipfilter/` and `docs/`:
+**Where to file things.** Issues are enabled on this fork, for the fork's own
+paths:
 <https://github.com/jw409/google-cloud-github-runner/issues>. Anything about
 the runner manager goes
 [upstream](https://github.com/Cyclenerd/google-cloud-github-runner/issues).
@@ -105,7 +105,7 @@ it before working in this repo. Human entry point: [`README.md`](README.md).
 | Status | Paths |
 |---|---|
 | **READ-ONLY — send changes upstream** | `app/` `gcp/` `tools/` `tests/` `Dockerfile` `requirements*.txt` `pytest.ini` `.github/` `.gitignore` `.dockerignore` `.gcloudignore` `.editorconfig` `.env.example` `.devcontainer/` `img/` `LICENSE` `CLOUD_SHELL_TUTORIAL.md` `CODE_OF_CONDUCT.md` |
-| **OURS — change freely** | `ipfilter/` `docs/` `RUNNER.xml` `AGENTS-LOCAL.md` |
+| **OURS — change freely** | every top-level path the fork adds. Today: `ipfilter/` `docs/` `RUNNER.xml` `AGENTS-LOCAL.md`. Expect this to grow; `README.md` holds the canonical list. |
 | **DECLARED DIVERGENCE — pinned, re-baseline to change** | `README.md` `CONTRIBUTING.md` `SECURITY.md` `AGENTS.md` |
 
 This is enforced mechanically, by comparing git object ids against a recorded
@@ -125,15 +125,16 @@ permission to change it.
 
 1. **Never edit an upstream path.** If your change seems to require it, it
    either belongs upstream or can be done by **composition** from outside
-   upstream's tree. `ipfilter/` is the worked example: it had to run before the
-   application's own routing and does so by wrapping the WSGI callable from a
-   consumer's entrypoint — zero upstream lines changed. `create_app()` is a
+   upstream's tree. The worked example is the IP allowlist: it had to run before
+   the application's own routing, and does so by wrapping the WSGI callable from
+   a consumer's entrypoint — zero upstream lines changed. `create_app()` is a
    factory and there are no app-level request hooks, which is what makes that
-   possible; `RUNNER.xml` documents the composition surface.
+   possible; `RUNNER.xml` documents the composition surface, and it generalises
+   to anything else that needs to sit in the request path.
 
 2. **Route the change before writing it.** Bug or feature in the runner
    manager → [upstream's issues](https://github.com/Cyclenerd/google-cloud-github-runner/issues).
-   Change to `ipfilter/` or `docs/` → here. Unsure → upstream. A fix landed
+   Change to a path this fork adds → here. Unsure → upstream. A fix landed
    upstream reaches everyone running this tool, including us.
 
 3. **Add no tooling.** No linters, formatters, type checkers, taint analysers,
@@ -143,7 +144,7 @@ permission to change it.
    codebase is a nuisance to everyone downstream of it.
 
 4. **Add no runtime dependencies.** `requirements.txt` is upstream's and
-   unmodified. `ipfilter/` is stdlib-only so that one of our additions can
+   unmodified, and additions here are stdlib-only, so that one of ours can
    never silently widen an upstream pin.
 
 5. **Disclose AI authorship.** Everything this fork adds was written by an AI
@@ -154,9 +155,9 @@ permission to change it.
 
 ## Verification rules
 
-6. **Use the explicit proof command.** Bare `pytest` picks up upstream's suite,
-   which needs Flask installed and fails collection — an environment failure,
-   not a fork failure.
+6. **Use each package's own proof command.** Bare `pytest` picks up upstream's
+   suite, which needs Flask installed and fails collection — an environment
+   failure, not a fork failure. For the IP allowlist:
 
    ```bash
    python -m pytest -c ipfilter/pytest.ini ipfilter/tests
@@ -175,14 +176,14 @@ permission to change it.
    not `cmd`'s. Redirect to a file, or capture the status before piping.
 
 9. **Say what you did not verify.** `RUNNER.xml` has a `not-verified` block for
-   exactly this; keep it current. `ipfilter/` is a fail-closed control whose
+   exactly this; keep it current. Where the fork adds a fail-closed control its
    bug mode is denying everyone, which looks identical to a quiet day — so
    "nothing is failing" is never evidence.
 
 ## Never send these upstream
 
-An upstream pull request must contain **only** the directory being offered
-(`ipfilter/`, in practice), branched from `upstream/master`.
+An upstream pull request must contain **only** the one directory being offered,
+branched from `upstream/master`.
 
 Never include:
 

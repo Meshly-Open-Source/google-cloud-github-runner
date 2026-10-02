@@ -31,19 +31,17 @@ directory this fork adds (see below), and so has nowhere upstream to go yet.
 
 ## 2. If it really does belong here 📥
 
-This fork adds exactly two top-level paths of its own:
+Changes to **the paths this fork adds** are welcome here, because they have
+nowhere upstream to go yet. Everything else is upstream's.
 
-| Path | Scope |
-|---|---|
-| `ipfilter/` | Framework-agnostic IP allowlist — policy core, WSGI and ASGI adapters |
-| `docs/` | Operating notes for building and hosting your own manager image |
+`README.md` has the current list — it changes as the fork grows, so it is kept
+in one place rather than restated here. At the time of writing it is a
+documentation directory and one self-contained package, and more is planned.
 
-Changes to those are welcome here. Anything else is upstream's.
-
-**Issues are enabled on this fork**, scoped to exactly those two paths:
-<https://github.com/jw409/google-cloud-github-runner/issues>. Please label the
-subject in the title (`ipfilter:` / `docs:`) so it is obvious at a glance that
-it is not an upstream bug filed in the wrong place.
+**Issues are enabled on this fork**, for the fork's own paths:
+<https://github.com/jw409/google-cloud-github-runner/issues>. Prefix the title
+with the path it concerns (`docs:`, and so on) so it is obvious at a glance
+that it is not an upstream bug filed in the wrong place.
 
 An issue about the runner manager itself will be closed with a pointer
 upstream. That is not unfriendliness — leaving it open here would mean it looks
@@ -61,24 +59,24 @@ In this order:
    general version of your idea than the narrow one.
 
 Being honest about the order does not mean the second criterion is decoration.
-`ipfilter/` is built to be given away — vendor-neutral, no framework in the
-core, no hardcoded address ranges, named for what it does rather than for us —
-precisely so that it can be offered upstream as "add this directory". If your
-change makes it *more* generally useful, that helps on both counts.
+What this fork adds is built to be given away — vendor-neutral, named for what
+it does rather than for us, no dependency on our deployment — precisely so that
+each piece can be offered upstream as "add this directory". If your change makes
+something here *more* generally useful, that helps on both counts.
 
 If the answer to (1) is no but (2) is a clear yes, the right home is upstream
 or your own fork, and we will tell you that rather than leave a PR open.
 
 ### What we need from a change
 
-* **A test that fails without it.** For `ipfilter/` especially: it is a
-  fail-closed security control, so a bug in it does not misbehave, it denies
-  everyone — which looks exactly like a quiet day and is therefore invisible.
-  Run `python -m pytest -c ipfilter/pytest.ini ipfilter/tests`.
+* **A test that fails without it.** Anything security-relevant gets extra
+  scrutiny here, because the failure mode of a fail-closed control is not
+  misbehaviour — it denies everyone, which looks exactly like a quiet day and
+  is therefore invisible. Each added package carries its own proof command;
+  see its directory.
 * **No new runtime dependencies**, unless the PR argues for the one it adds.
-  `ipfilter/` is stdlib-only on purpose: it needs set membership, not
-  longest-prefix matching, so a C-extension trie would add a supply-chain
-  entry and a build step in exchange for nothing.
+  Upstream's `requirements.txt` is unmodified, and additions here are
+  stdlib-only so that one of ours can never silently widen an upstream pin.
 * **Match the surrounding style.** `flake8 --max-line-length=127`, spaces,
   no trailing whitespace — upstream's rules, which this fork follows.
 * **Please do not add tooling.** No new linters, formatters, type checkers,

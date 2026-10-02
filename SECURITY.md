@@ -23,24 +23,20 @@ fix has to land there.
 
 ## If it is in this fork's own code
 
-Only two paths are ours:
+The paths this fork adds are ours; `README.md` lists them, and the list grows
+as the fork does. Everything else in the tree is upstream's, unmodified.
 
-| Path | What it is |
-|---|---|
-| `ipfilter/` | Framework-agnostic IP allowlist — policy core, WSGI and ASGI adapters |
-| `docs/` | Operating notes |
-
-Report those privately to **`security@meshly.ai`**, or via
+Report anything in our paths privately to **`security@meshly.ai`**, or via
 [GitHub private vulnerability reporting](https://github.com/jw409/google-cloud-github-runner/security/advisories/new)
 on this repository.
 
 Please include the version or commit, what an attacker gains, and a
 reproduction if you have one.
 
-### Especially wanted in `ipfilter/`
+### Especially wanted: quiet failures in access controls
 
-It is a fail-closed access control, and its failure mode is quiet, so the two
-bug classes we most want to hear about are:
+Where this fork adds a fail-closed access control, its failure mode is quiet,
+so the two bug classes we most want to hear about are:
 
 1. **A bypass** — any input that yields `allow` for an address no configured
    set contains. Forwarded-header shapes are the obvious surface: injected
@@ -52,8 +48,8 @@ bug classes we most want to hear about are:
    indistinguishable from "nobody is calling us". If you find a way to make it
    fail shut and look healthy, that is a real finding and we want it.
 
-A disagreement between the WSGI and ASGI adapters on the same request is also
-a finding, whichever way it falls.
+Where a control ships more than one transport adapter, a disagreement between
+them on the same request is also a finding, whichever way it falls.
 
 ## What you get
 

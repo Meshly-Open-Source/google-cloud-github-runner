@@ -28,14 +28,14 @@
 <index generated="2026-10-02" note="line numbers computed from this file, not estimated">
   <section name="ai-generated-disclosure" line="44" what="Who wrote the fork's code. READ FIRST."/>
   <section name="contribution-routing" line="70" what="Does your change go here or upstream? Decide BEFORE coding."/>
-  <section name="identity" line="110" what="What the project is, and what the fork is"/>
-  <section name="repo-map" line="176" what="Every top-level path, and whether you may touch it"/>
-  <section name="fork-invariants" line="206" what="Hard guarantees about the fork boundary"/>
-  <section name="application-facts" line="261" what="Routes, env vars, runtime shape - read from upstream's code"/>
-  <section name="additions" line="329" what="ipfilter/ and docs/ - the fork's own code"/>
-  <section name="build-and-deploy" line="403" what="Building your own image; the traps"/>
-  <section name="agent-empathy" line="462" what="What agents get wrong in this repo"/>
-  <section name="attestation" line="521" what="What was verified, and what was NOT"/>
+  <section name="identity" line="111" what="What the project is, and what the fork is"/>
+  <section name="repo-map" line="177" what="Every top-level path, and whether you may touch it"/>
+  <section name="fork-invariants" line="207" what="Hard guarantees about the fork boundary"/>
+  <section name="application-facts" line="262" what="Routes, env vars, runtime shape - read from upstream's code"/>
+  <section name="additions" line="330" what="ipfilter/ and docs/ - the fork's own code"/>
+  <section name="build-and-deploy" line="404" what="Building your own image; the traps"/>
+  <section name="agent-empathy" line="463" what="What agents get wrong in this repo"/>
+  <section name="attestation" line="522" what="What was verified, and what was NOT"/>
 </index>
 
 <!-- ═══════════════════════════════════════════════════════════════════════════
@@ -76,15 +76,16 @@
     A fix landed upstream reaches everyone running this tool, including us. A
     fix landed here reaches us and strands you on a fork.
   </rule>
-  <rule condition="change-to-ipfilter-or-docs" send-to="THIS_FORK">
-    The only two paths that are ours. They have nowhere upstream to go yet.
+  <rule condition="change-to-a-path-this-fork-adds" send-to="THIS_FORK">
+    See repo-map for the current set. These have nowhere upstream to go yet.
   </rule>
   <rule condition="you-want-to-edit-an-upstream-file-to-make-your-change-work" send-to="STOP">
     That is the situation the fork is arranged to prevent. Either the change
     belongs upstream, or it can be done by COMPOSITION from outside upstream's
-    tree. ipfilter/ is the worked example: it needed to run before the
-    application's own routing, and it does that by wrapping the WSGI callable
-    from a consumer's entrypoint - zero upstream lines changed.
+    tree. The worked example is the IP allowlist: it needed to run before the
+    application's own routing, and does that by wrapping the WSGI callable from
+    a consumer's entrypoint - zero upstream lines changed. The technique
+    generalises to anything else needing a place in the request path.
   </rule>
   <rule condition="unsure" send-to="UPSTREAM">
     Cheaper to be redirected there than to maintain a divergence here.
@@ -140,14 +141,14 @@
         <trigger>Any modification to an upstream CODE path.</trigger>
         <trigger>Carrying a patch series, or a merge of upstream changes we rewrote.</trigger>
         <trigger>Our additions acquiring dependencies upstream does not have.</trigger>
-        <trigger>ipfilter/ becoming load-bearing for the application rather than composed in.</trigger>
+        <trigger>Any addition becoming load-bearing for the application rather than composed in.</trigger>
         <trigger>Offering nothing upstream. A soft fork that never sends anything back is a slow
                  hard fork.</trigger>
       </would-make-it-hard>
     </softness>
-    <issue-tracker scope="ipfilter/ and docs/ ONLY" enabled="true">
+    <issue-tracker scope="the paths this fork ADDS; see repo-map for the current set" enabled="true">
       https://github.com/jw409/google-cloud-github-runner/issues
-      Anything about the runner manager goes upstream. Filing an upstream bug here makes it look
+      Anything about the runner manager itself goes upstream. Filing an upstream bug here makes it look
       tracked while nobody who can fix it is reading it.
     </issue-tracker>
     <why>
@@ -189,7 +190,7 @@
         owner="upstream" status="READ_ONLY"/>
   <path name="CLOUD_SHELL_TUTORIAL.md CODE_OF_CONDUCT.md" owner="upstream" status="READ_ONLY"/>
 
-  <path name="ipfilter/" owner="fork" status="OURS" what="Framework-agnostic IP allowlist. Stdlib only."/>
+  <path name="ipfilter/" owner="fork" status="OURS" what="IP allowlist: policy core plus WSGI/ASGI adapters. Stdlib only. One addition among several, not the fork's purpose."/>
   <path name="docs/" owner="fork" status="OURS" what="Self-hosting notes: Artifact Registry, Cloud Build caching"/>
   <path name="RUNNER.xml" owner="fork" status="OURS" what="This file"/>
   <path name="AGENTS-LOCAL.md" owner="fork" status="OURS" what="Repo-wide agent rules. Tracked, not gitignored. Mandatory read."/>
