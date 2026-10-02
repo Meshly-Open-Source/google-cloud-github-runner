@@ -2,7 +2,7 @@
 <runner-manifest
   version="0.1.0"
   signed-by="claude-opus-5-5"
-  repo="jw409/google-cloud-github-runner"
+  repo="Meshly-Open-Source/google-cloud-github-runner"
   upstream="Cyclenerd/google-cloud-github-runner"
   relationship="SOFT FORK - tracks upstream, adds directories, modifies no upstream code"
   key-insight="The fork's value is the boundary, not the code. Additions never edits means a version bump is a fast-forward, not a merge of code we did not write.">
@@ -147,7 +147,7 @@
       </would-make-it-hard>
     </softness>
     <issue-tracker scope="the paths this fork ADDS; see repo-map for the current set" enabled="true">
-      https://github.com/jw409/google-cloud-github-runner/issues
+      https://github.com/Meshly-Open-Source/google-cloud-github-runner/issues
       Anything about the runner manager itself goes upstream. Filing an upstream bug here makes it look
       tracked while nobody who can fix it is reading it.
     </issue-tracker>

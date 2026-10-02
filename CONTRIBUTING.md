@@ -39,7 +39,7 @@ in one place rather than restated here. At the time of writing it is a
 documentation directory and one self-contained package, and more is planned.
 
 **Issues are enabled on this fork**, for the fork's own paths:
-<https://github.com/jw409/google-cloud-github-runner/issues>. Prefix the title
+<https://github.com/Meshly-Open-Source/google-cloud-github-runner/issues>. Prefix the title
 with the path it concerns (`docs:`, and so on) so it is obvious at a glance
 that it is not an upstream bug filed in the wrong place.
 

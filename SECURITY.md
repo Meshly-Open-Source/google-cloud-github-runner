@@ -27,7 +27,7 @@ The paths this fork adds are ours; `README.md` lists them, and the list grows
 as the fork does. Everything else in the tree is upstream's, unmodified.
 
 Report anything in our paths privately to **`security@meshly.ai`**, or via
-[GitHub private vulnerability reporting](https://github.com/jw409/google-cloud-github-runner/security/advisories/new)
+[GitHub private vulnerability reporting](https://github.com/Meshly-Open-Source/google-cloud-github-runner/security/advisories/new)
 on this repository.
 
 Please include the version or commit, what an attacker gains, and a

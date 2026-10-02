@@ -164,7 +164,7 @@ run picks up the project's own suite instead.
 
 **Upstream first** — <https://github.com/Cyclenerd/google-cloud-github-runner/issues>.
 For this fork's own paths, its tracker is open:
-<https://github.com/jw409/google-cloud-github-runner/issues>.
+<https://github.com/Meshly-Open-Source/google-cloud-github-runner/issues>.
 A fix landed upstream reaches everyone running this tool, including us; a fix
 landed here strands you on a fork. We will not merge a change that should have
 gone upstream.

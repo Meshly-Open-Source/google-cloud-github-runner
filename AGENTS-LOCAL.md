@@ -85,7 +85,7 @@ fifth, update the count here and in `README.md` — a stale count is how
 
 **Where to file things.** Issues are enabled on this fork, for the fork's own
 paths:
-<https://github.com/jw409/google-cloud-github-runner/issues>. Anything about
+<https://github.com/Meshly-Open-Source/google-cloud-github-runner/issues>. Anything about
 the runner manager goes
 [upstream](https://github.com/Cyclenerd/google-cloud-github-runner/issues).
 Filing an upstream bug on the fork makes it look tracked while nobody who can
