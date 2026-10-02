@@ -40,6 +40,15 @@ This fork adds exactly two top-level paths of its own:
 
 Changes to those are welcome here. Anything else is upstream's.
 
+**Issues are enabled on this fork**, scoped to exactly those two paths:
+<https://github.com/jw409/google-cloud-github-runner/issues>. Please label the
+subject in the title (`ipfilter:` / `docs:`) so it is obvious at a glance that
+it is not an upstream bug filed in the wrong place.
+
+An issue about the runner manager itself will be closed with a pointer
+upstream. That is not unfriendliness — leaving it open here would mean it looks
+tracked while nobody who can fix it is reading it.
+
 ### How we evaluate a contribution
 
 Stated plainly, because an unstated priority order is just a slower rejection.

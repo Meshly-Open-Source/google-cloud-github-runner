@@ -76,6 +76,21 @@ A hard fork would mean taking ownership of the application and maintaining our
 own line of it. We are explicitly not doing that, and most of the rules below
 exist to keep that true under time pressure.
 
+**It has drifted, and you should know by how much.** Zero upstream code paths
+are modified; **four** upstream documentation files are diverged
+(`README.md`, `CONTRIBUTING.md`, `SECURITY.md`, `AGENTS.md`), each pinned by
+blob hash. That is soft on code and *medium* on documentation. If you add a
+fifth, update the count here and in `README.md` — a stale count is how
+"we barely touch upstream" survives past the point of being true.
+
+**Where to file things.** Issues are enabled on this fork, scoped to
+`ipfilter/` and `docs/`:
+<https://github.com/jw409/google-cloud-github-runner/issues>. Anything about
+the runner manager goes
+[upstream](https://github.com/Cyclenerd/google-cloud-github-runner/issues).
+Filing an upstream bug on the fork makes it look tracked while nobody who can
+fix it is reading it.
+
 Detailed, machine-readable manifest: **[`RUNNER.xml`](RUNNER.xml)** — repo map
 with per-path permissions, the application's real route set and env vars, the
 composition surface, build traps, and what has and has not been verified. Read

@@ -29,13 +29,13 @@
   <section name="ai-generated-disclosure" line="44" what="Who wrote the fork's code. READ FIRST."/>
   <section name="contribution-routing" line="70" what="Does your change go here or upstream? Decide BEFORE coding."/>
   <section name="identity" line="110" what="What the project is, and what the fork is"/>
-  <section name="repo-map" line="150" what="Every top-level path, and whether you may touch it"/>
-  <section name="fork-invariants" line="180" what="Hard guarantees about the fork boundary"/>
-  <section name="application-facts" line="235" what="Routes, env vars, runtime shape - read from upstream's code"/>
-  <section name="additions" line="303" what="ipfilter/ and docs/ - the fork's own code"/>
-  <section name="build-and-deploy" line="377" what="Building your own image; the traps"/>
-  <section name="agent-empathy" line="436" what="What agents get wrong in this repo"/>
-  <section name="attestation" line="495" what="What was verified, and what was NOT"/>
+  <section name="repo-map" line="176" what="Every top-level path, and whether you may touch it"/>
+  <section name="fork-invariants" line="206" what="Hard guarantees about the fork boundary"/>
+  <section name="application-facts" line="261" what="Routes, env vars, runtime shape - read from upstream's code"/>
+  <section name="additions" line="329" what="ipfilter/ and docs/ - the fork's own code"/>
+  <section name="build-and-deploy" line="403" what="Building your own image; the traps"/>
+  <section name="agent-empathy" line="462" what="What agents get wrong in this repo"/>
+  <section name="attestation" line="521" what="What was verified, and what was NOT"/>
 </index>
 
 <!-- ═══════════════════════════════════════════════════════════════════════════
@@ -124,6 +124,32 @@
   </project>
   <fork>
     <maintainer>meshly.ai</maintainer>
+    <softness note="A gradient, not a badge. Keep these counts current -- a stale count is how
+                    'we barely touch upstream' survives past the point of being true.">
+      <upstream-code-paths-modified>0</upstream-code-paths-modified>
+      <upstream-doc-paths-diverged>4</upstream-doc-paths-diverged>
+      <directories-added>2</directories-added>
+      <root-files-added>2</root-files-added>
+      <verdict>Soft on code, MEDIUM on documentation.</verdict>
+      <what-keeps-it-soft>
+        The divergence is confined to files that cannot change program behaviour, and that is
+        enforced structurally rather than by intention: only top-level .md blobs can be declared,
+        so no edit to the baseline can add app/ or requirements.txt to the exception set.
+      </what-keeps-it-soft>
+      <would-make-it-hard>
+        <trigger>Any modification to an upstream CODE path.</trigger>
+        <trigger>Carrying a patch series, or a merge of upstream changes we rewrote.</trigger>
+        <trigger>Our additions acquiring dependencies upstream does not have.</trigger>
+        <trigger>ipfilter/ becoming load-bearing for the application rather than composed in.</trigger>
+        <trigger>Offering nothing upstream. A soft fork that never sends anything back is a slow
+                 hard fork.</trigger>
+      </would-make-it-hard>
+    </softness>
+    <issue-tracker scope="ipfilter/ and docs/ ONLY" enabled="true">
+      https://github.com/jw409/google-cloud-github-runner/issues
+      Anything about the runner manager goes upstream. Filing an upstream bug here makes it look
+      tracked while nobody who can fix it is reading it.
+    </issue-tracker>
     <why>
       Somewhere to put code upstream does not have yet, without editing
       upstream's code to do it. Not customisation - there are no behaviour

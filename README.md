@@ -55,7 +55,10 @@ than have you infer it from the commit style.
 
 ## What's different from upstream
 
-Nothing is changed. Two directories are added.
+No upstream **code** is changed. Two directories are added, two root files are
+added, and four documentation files are diverged — see
+[how soft this fork is](#how-soft-is-this-fork-honestly) for the honest
+accounting.
 
 | | Change | Path |
 |---|---|---|
@@ -75,6 +78,41 @@ dependencies. The application in this repository does exactly what upstream's
 does, and `ipfilter/` is **not wired into it** — enabling it is a composition
 step a deployment performs for itself, which is why `app/` does not need to
 move.
+
+## How soft is this fork, honestly
+
+"Soft fork" is a gradient, not a badge, and this one has drifted along it. Where
+it actually sits today:
+
+| | Count | What |
+|---|---|---|
+| Upstream **code** paths modified | **0** | `app/` `gcp/` `tools/` `tests/` `Dockerfile` `requirements*.txt` `.github/` — byte-identical, mechanically verified |
+| Upstream **doc** paths diverged | **4** | `README.md` `CONTRIBUTING.md` `SECURITY.md` `AGENTS.md` — each pinned by blob hash |
+| Directories added | **2** | `ipfilter/` `docs/` |
+| Root files added | **2** | `AGENTS-LOCAL.md` `RUNNER.xml` |
+
+So: **soft on code, medium on documentation.** Four diverged doc files is more
+than "a fork notice", and pretending otherwise would be the kind of claim that
+gets believed and then relied on. The thing that keeps it soft is that the
+divergence is confined to files that cannot change program behaviour — and that
+this is enforced structurally, not by good intentions: only top-level `.md`
+blobs can be declared, so no amount of editing the baseline can add `app/` or
+`requirements.txt` to that list.
+
+**What would make it a hard fork** — stated so we notice if it happens:
+
+1. Any modification to an upstream **code** path. The mechanism makes this
+   impossible to do quietly; it would be a deliberate choice.
+2. Carrying a **patch series** against upstream, or a merge of upstream changes
+   we rewrote. A bump stops being a fast-forward.
+3. Our additions acquiring **dependencies** upstream does not have.
+4. `ipfilter/` becoming **load-bearing for the application** rather than
+   something a deployment composes in.
+5. Offering nothing upstream. A soft fork that never sends anything back is
+   just a slow hard fork.
+
+If you are reading this because one of those happened, the README is the thing
+that should have been updated first.
 
 ## Why the fork exists
 
@@ -141,6 +179,8 @@ run picks up the project's own suite instead.
 ## Contributing
 
 **Upstream first** — <https://github.com/Cyclenerd/google-cloud-github-runner/issues>.
+For `ipfilter/` and `docs/` only, this fork's own tracker is open:
+<https://github.com/jw409/google-cloud-github-runner/issues>.
 A fix landed upstream reaches everyone running this tool, including us; a fix
 landed here strands you on a fork. We will not merge a change that should have
 gone upstream.
