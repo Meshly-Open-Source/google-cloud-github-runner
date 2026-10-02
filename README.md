@@ -1,300 +1,153 @@
-# Self-Hosted GitHub Actions Runners for Google Cloud
+# google-cloud-github-runner — meshly.ai fork
 
-[![Badge: GitHub](https://img.shields.io/badge/GitHub-181717.svg?logo=github&logoColor=white)](#readme)
-[![Badge: Google Cloud](https://img.shields.io/badge/Google%20Cloud-%234285F4.svg?logo=google-cloud&logoColor=white)](#readme)
-[![Badge: Linux](https://img.shields.io/badge/Linux-FCC624.svg?logo=linux&logoColor=black)](#readme)
-[![Badge: Terraform](https://img.shields.io/badge/Terraform-%235835CC.svg?logo=terraform&logoColor=white)](#readme)
+[![Badge: License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![Badge: Python](https://img.shields.io/badge/Python-3670A0?logo=python&logoColor=ffdd54)](#readme)
-[![CI/CD Status](https://github.com/Cyclenerd/google-cloud-github-runner/actions/workflows/ci.yml/badge.svg)](https://github.com/Cyclenerd/google-cloud-github-runner/actions/workflows/ci.yml)
-[![Badge: License](https://img.shields.io/github/license/Cyclenerd/google-cloud-github-runner)](https://github.com/Cyclenerd/google-cloud-github-runner/blob/master/LICENSE)
+[![Badge: Google Cloud](https://img.shields.io/badge/Google%20Cloud-%234285F4.svg?logo=google-cloud&logoColor=white)](#readme)
 
+A fork of **[Cyclenerd/google-cloud-github-runner](https://github.com/Cyclenerd/google-cloud-github-runner)** —
+ephemeral, just-in-time self-hosted GitHub Actions runners on Google Cloud.
 
-This application is **exclusively built for Google Cloud Platform (GCP)**, leveraging native services like **Google Compute Engine (GCE) Instance Templates** to manage **ephemeral** just-in-time self-hosted GitHub Actions Runners. Unlike generic solutions that merely "support" GCP, this project offers a deep, cloud-native integration designed specifically for GCP.
+**Read upstream's documentation, not this file.** Everything about what the
+tool is, how to deploy it, how to configure it, its architecture, its
+environment variables and its API lives in
+**[upstream's README](https://github.com/Cyclenerd/google-cloud-github-runner#readme)**
+and is not duplicated here. Duplicated docs rot, and a fork's copy rots
+fastest, so this README covers one thing only: **how this fork differs from
+upstream.** If you are evaluating the tool, you are in the wrong repository —
+go upstream.
 
-For the developer, it functions as a **drop-in replacement**: just add `gcp-` to your GitHub Actions workflow YAML file (e.g., replace `runs-on: ubuntu-latest` with `runs-on: gcp-ubuntu-latest`).
+## ⚠️ AI-generated code disclosure
 
-The architecture prioritizes **simplicity and auditability**, avoiding complex abstractions. All services are configured **regionally**, giving you full control over data sovereignty. This ensures that strictly regional requirements—such as keeping all infrastructure and data within Germany—are easily met.
+**Everything this fork adds was written by an AI coding agent** (Claude), under
+human direction and review. That covers all of `ipfilter/`, all of `docs/`, and
+this README, `CONTRIBUTING.md` and `SECURITY.md`. Treat it accordingly:
 
-## ✨ Features
+* **Upstream's code is not affected.** The fork modifies no path upstream owns,
+  so nothing generated here has touched the application. That is verified
+  mechanically, not asserted — see
+  [the invariant](#the-additions-never-edits-invariant).
+* **Review it before you trust it.** `ipfilter/` is a fail-closed access
+  control, which is exactly the category where plausible-looking wrong code is
+  most expensive: a bug does not misbehave, it denies every caller, and that
+  looks indistinguishable from a quiet day. Read the tests — they are the
+  claim — and do not deploy it on our say-so.
+* **What was actually verified**, so you can judge the rest: the test suite
+  passes, it is `flake8`-clean under upstream's own rules, and twelve
+  deliberate mutations of the implementation each turn the suite red (wrong
+  address family, ignored chain index, unevaluable treated as allow, uncovered
+  route allowed, and so on). That establishes the tests detect those specific
+  failures. It does not establish the design is right for your deployment.
+* **If we offer any of this upstream**, it will say the same thing in the pull
+  request. A maintainer deciding whether to review a patch is entitled to know
+  how it was produced, and finding out afterwards is worse for everyone.
 
-*   **Native Hardware Support**: Easily switch between **x86/64** (Intel, AMD) and **ARM** (Ampere Altra, Google Axion) architectures.
-*   **Flexible Instance Sizes**: Choose the exact CPU and RAM needed for your workload using different GCE machine types.
-*   **Workflow Jobs run in VMs, not Containers**: Better isolation and native support for tools that struggle in containerized environments (like Docker-in-Docker or system-level changes).
-*   **No Kubernetes Overhead**: No cluster to manage, no complex operator configuration. Just Terraform and Cloud Run.
-*   **Ephemeral Runners**: Automatically creates and destroys runners for each job.
-*   **Org & Repo Level**: Supports both Organization and Repository level runners.
-*   **Automatic Setup**: Easy web-based setup to create and configure the GitHub App.
-*   **Secure Configuration**: Automatically stores credentials in Google Secret Manager.
-*   **Cost Effective**: Runners are only active when jobs are queued.
+No claim is made here that a human hand-wrote it. We would rather say so plainly
+than have you infer it from the commit style.
 
-## 📺 Video Tutorial
+## What's different from upstream
 
-[![Tutorial Video on YouTube](img/youtube.jpeg)](https://www.youtube.com/watch?v=TBCL2Z7ryzA)
+Nothing is changed. Two directories are added.
 
-Click the image to watch the 3-minute video tutorial.
+| | Change | Path |
+|---|---|---|
+| ➕ | **Framework-agnostic IP allowlist** — a pure policy core plus WSGI and ASGI adapters. Stdlib only, no web framework in the core, and no address ranges anywhere in the package. | [`ipfilter/`](ipfilter/) |
+| ➕ | **Self-hosting notes** — Artifact Registry layout and Cloud Build caching for running your own build of the manager image. | [`docs/`](docs/) |
+| ✏️ | This file, [`CONTRIBUTING.md`](CONTRIBUTING.md) and [`SECURITY.md`](SECURITY.md), to say what the fork is and where to send patches. | — |
+| ✏️ | Default branch is `main`. Upstream's is `master`. | — |
 
-## 🚀 Quick Start (10 Minutes)
+That is the complete list, and it is mechanically enforced rather than
+promised — see [below](#the-additions-never-edits-invariant).
 
-The fastest way to get started is using **Google Cloud Shell**.
+**Not changed:** `app/`, `gcp/`, `tools/`, `tests/`, `Dockerfile`,
+`requirements.txt`, `.github/`, and every other path upstream owns. Byte for
+byte. No patch series, no cherry-picks, no behaviour changes, no new runtime
+dependencies. The application in this repository does exactly what upstream's
+does, and `ipfilter/` is **not wired into it** — enabling it is a composition
+step a deployment performs for itself, which is why `app/` does not need to
+move.
 
-1.  **Open in Cloud Shell**:
+## Why the fork exists
 
-    [![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.png)](https://shell.cloud.google.com/cloudshell/open?shellonly=true&ephemeral=false&cloudshell_git_repo=https://github.com/Cyclenerd/google-cloud-github-runner&cloudshell_git_branch=master&cloudshell_tutorial=CLOUD_SHELL_TUTORIAL.md)
-2.  **Trust the Repo**: Click "Trust repo" when prompted to enable the tutorial features.
-3.  **Follow the Tutorial**: A step-by-step guide will open directly in your terminal.
+We needed somewhere to put code upstream does not have yet, without editing
+upstream's code to do it.
 
-## 📋 Prerequisites
+The reason for the constraint is selfish: it keeps a version bump a
+fast-forward instead of a merge of code we did not write. What it specifically
+buys is protection from a patch that applies **with fuzz** — which succeeds,
+and now means something different, and nothing fails and nobody looks.
 
-All requirements are pre-installed in [Google Cloud Shell](https://shell.cloud.google.com/), making it the recommended environment for deployment.
+It also means you can audit this fork without reading a diff. We changed
+nothing; we added directories.
 
-Alternatively, you can install the tools locally on your machine.
+### The additions-never-edits invariant
 
-> Note: If you don't want to install the Terraform and Google Cloud CLI locally yourself, you can also use a [Dev Container](https://containers.dev/).
-> Try it out with the `Dev Containers: Reopen in Container` command in VS Code.
+> Every path upstream owns is byte-identical here, **except** an explicitly
+> baselined set of top-level `.md` files, each pinned by its exact blob hash.
+> Everything this fork adds is a new top-level path.
 
-*   **Google Cloud Project**: A GCP project with billing enabled. The **Owner role** is the easiest option for this tutorial. If the Owner role is not possible, see [gcp/README.md](gcp/README.md) for the specific roles required.
-*   **gcloud CLI**: [Download and install](https://docs.cloud.google.com/sdk/docs/install-sdk), then authenticate with your GCP account.
-*   **Terraform**: [Download and install](https://developer.hashicorp.com/terraform/downloads), than use for easy Google Cloud services deployment.
-*   **Python 3.14+**: Only needed for local development and changes to the code.
+Checked by comparing git object ids against a recorded baseline of upstream's
+tree, which is a Merkle comparison — `app` matching means every file beneath
+it matches, recursively. The three documentation exceptions are declared
+individually and pinned, so editing one *again* fails the check until it is
+re-baselined, and a non-`.md` or nested path cannot be declared at all. That
+last restriction is the one that actually protects `app/`.
 
-## ⚠️ Cost Control and Predictability
+## `ipfilter/`
 
-> [!WARNING]
-> **This project will incur Google Cloud costs.** This application creates and manages Google Compute Engine instances, which generate billable charges. Key cost considerations:
-> - **More instances = higher costs**: Each workflow job creates a new instance
-> - **Larger instances = higher costs**: More CPU cores and RAM increase hourly rates
-> - **Malfunctioning workflows**: A GitHub workflow pipeline that doesn't function properly may run longer than intended, accumulating unexpected costs
-> - **Failed termination**: Instances may not be terminated and deleted correctly due to errors or misconfigurations, resulting in ongoing charges
-> - **Billing alerts recommended**: Set up [Google Cloud billing alerts and budgets](https://cloud.google.com/billing/docs/how-to/budgets) to monitor and control spending
-> 
-> **Use at your own risk.** Always monitor your Google Cloud billing dashboard and implement cost controls.
+Built to be given away. It is named for what it does rather than for us, takes
+no dependency on this application, and imports no web framework, so the offer
+to upstream is "add exactly this directory" — no renames, no imports to
+unpick.
 
-Despite these cost considerations, self-hosting on Google Cloud offers significant advantages:
+Three deliberate properties, each of which is a mistake we wanted to make
+impossible:
 
-* **Potentially Lower Costs for High Usage:** For organizations with consistently high CI/CD usage, self-hosting on Google Cloud can be significantly more cost-effective than paying for GitHub Actions minutes, especially for larger jobs or parallel execution.
-* **No Usage Limits (Within Google Compute Engine (GCE) Quota):** You're not restricted by GitHub Actions usage limits. This is beneficial for large builds, extensive testing, or frequent deployments.
+* **No address ranges in the package.** A library that ships a default range
+  set turns one consumer's allowlist into a silent default for every future
+  consumer. The consumer supplies named sets; a policy naming a set the
+  consumer did not supply is *unevaluable*, and under fail-closed that denies.
+* **Three decisions, not two** — allow, deny, **unevaluable**. "This caller is
+  not on the list" and "I do not have a list" have opposite implications and
+  different fixes, and a single `denied` counter conflates them. The collapse
+  to a block happens at the enforcement edge, as a configured fail mode, with
+  the reason preserved in the record.
+* **Every route explicit, including "no check".** A table that covers the
+  routes it knows about and lets the rest through is an inclusion list, and it
+  fails open on the route added next week by someone who never read it. An
+  uncovered route is a **startup failure**; a route that genuinely takes no
+  address check is declared as such and must carry a written justification.
 
-The following table provides a comparison of pricing between GitHub-managed Actions runners and Google Cloud with self-hosted runners (information provided without guarantee):
-
-| Runner | [GitHub](https://docs.github.com/en/billing/managing-billing-for-your-products/managing-billing-for-github-actions/about-billing-for-github-actions) | [Google Cloud](https://gcloud-compute.com/instances.html) | Cost Saving | Cost Saving (%) |
-|-----------------|--------------|----------------|----------------|---------|
-| 2 Core (Intel)  | $0.36 USD/hr | $0.067 USD/hr  | $0.293 USD/hr  | 81.39 % |
-| 4 Core (Intel)  | $0.72 USD/hr | $0.134 USD/hr  | $0.586 USD/hr  | 81.39 % |
-| 8 Core (Intel)  | $1.32 USD/hr | $0.268 USD/hr  | $1.052 USD/hr  | 79.70 % |
-| 16 Core (Intel) | $2.52 USD/hr | $0.5361 USD/hr | $1.9839 USD/hr | 78.73 % |
-| 2 Core (Arm)    | $0.30 USD/hr | $0.0898 USD/hr | $0.2102 USD/hr | 70.07 % |
-| 4 Core (Arm)    | $0.48 USD/hr | $0.1796 USD/hr | $0.3004 USD/hr | 62.58 % |
-| 8 Core (Arm)    | $0.84 USD/hr | $0.3592 USD/hr | $0.4808 USD/hr | 57.24 % |
-| 16 Core (Arm)   | $1.56 USD/hr | $0.7184 USD/hr | $0.8416 USD/hr | 53.95 % |
-
-GitHub prices are based on January 1, 2026.
-Google Cloud prices are based on the `us-central1` (Iowa, USA) region using E2 or C2A machine types without disk space.
-
-Further savings are possible through Committed Use Discounts (CUD) or Spot VMs.
-For details on default machine types, see [`gcp/README.md`](gcp/README.md).
-
-You can estimate costs using the [Google Cloud Pricing Calculator](https://cloud.google.com/products/calculator) or [gcloud-compute.com](https://gcloud-compute.com/). The minimum monthly cost for the deployed Cloud Run service is approximately $10 USD.
-
-## 📚 Project Philosophy
-
-This application and project allows you to create **ephemeral** and **isolated** runners for each job.
-The core design principle is **"New Job, New Server"**.
-
-*   **Isolation & Security:** Every job runs in a pristine environment. There is no cross-contamination or security risk from sharing runner instances across different repositories or workflows.
-*   **Lifecycle:** This application manages the full lifecycle of the runner instance: `Create` and `Destroy`.
-*   **Cattle, not Pets:** Servers are disposable resources. Long-running, shared resources or maintaining a pool of persistent server and runner instances is outside the scope of this project.
-
-## 🛠️ Deployment to Google Cloud
-
-Deploy the entire stack using Terraform:
+Design notes are in [`ipfilter/__init__.py`](ipfilter/__init__.py). What is
+actually guaranteed is in [`ipfilter/tests/`](ipfilter/tests/):
 
 ```bash
-git clone "https://github.com/Cyclenerd/google-cloud-github-runner.git"
-cd google-cloud-github-runner/gcp
-export GOOGLE_CLOUD_PROJECT=your-project-id
-terraform init
-terraform apply
+python -m pytest -c ipfilter/pytest.ini ipfilter/tests
 ```
 
-**What this does:**
-*   **Provisions Identity:** Creates a Service Account with least-privilege permissions (Compute Admin, Secret Manager Admin, Cloud Run Admin).
-*   **Provisions Network:** Creates a VPC and Subnet with Cloud NAT for the runners.
-*   **Custom Images:** Creates two custom Ubuntu images for the runners (one for Intel and one for ARM).
-*   **Instance Templates:** Creates different Google Compute Engine Instance templates for the runners.
-*   **Container Image:** Creates the Container image for the runner manager and stores it in Google Artifact Registry.
-*   **Deploys Service:** Launches the runner manager on Cloud Run.
-*   **Outputs URL:** Displays the `service_url` required for the setup below.
+Pass the directory explicitly — `testpaths` resolves against pytest's inferred
+rootdir, which differs between a bare run and one with arguments, and a bare
+run picks up the project's own suite instead.
 
-For detailed deployment instructions and configuration options, see [gcp/README.md](gcp/README.md).
+## Contributing
 
-## ⚙️ Configuration & Setup
+**Upstream first** — <https://github.com/Cyclenerd/google-cloud-github-runner/issues>.
+A fix landed upstream reaches everyone running this tool, including us; a fix
+landed here strands you on a fork. We will not merge a change that should have
+gone upstream.
 
-Complete the setup via the provided web interface:
+Changes to `ipfilter/` or `docs/` are welcome here, since they have nowhere
+upstream to go yet. See [CONTRIBUTING.md](CONTRIBUTING.md) for how we evaluate
+them, including the priority order, stated plainly.
 
-1.  **Access Setup:** Navigate to `service_url` (from Terraform output).
-    
-    **Authentication Required:** All `/setup` routes are protected with HTTP Basic Authentication:
-    - **Username:** `cloud`
-    - **Password:** Your Google Cloud Project ID (value of `GOOGLE_CLOUD_PROJECT`)
-2.  **Create & Install:** Click **Setup GitHub App**, then install it on your target Organization or Repository.
-3.  **Auto-Configuration:** The system handles the rest automatically:
-    *   **Secure Storage:** Saves the Private Key to Secret Manager.
-    *   **Service Update:** Configures Cloud Run with the new App ID and Installation ID.
-    *   *(Local Dev)* Appends credentials to your `.env` file.
+## Licence and credit
 
-4.  **Update Workflows**:
-    Configure your GitHub Actions CI/CD to use the runners. The `runs-on` key **must match** the name of the GCE Instance Template (e.g., `gcp-ubuntu-latest` or `gcp-ubuntu-24-04-8core-arm`).
+Upstream is the work of **[Cyclenerd](https://github.com/Cyclenerd)** and its
+contributors, used here under the [Apache-2.0 licence](LICENSE). Additions in
+this fork are under the same licence.
 
-    ```yaml
-    jobs:
-      test:
-        runs-on: gcp-ubuntu-latest  # Must match GCE Template Name
-        steps:
-          - run: echo "Hello from Google Cloud!"
-    ```
+If this project is useful to you, support **upstream**, not this fork.
 
-## 🏗️ Architecture
+## Sponsor
 
-```mermaid
-graph TD
-    user((🧑‍💻 User))
-
-    subgraph GitHub
-        gh_actions[🐙 GitHub Actions]
-        gh_api[📡 GitHub API]
-    end
-
-    subgraph GCP[Google Cloud Platform]
-        subgraph CloudRun[Cloud Run Service]
-            flask[🚀 Python Flask App]
-        end
-
-        subgraph Secrets[Secret Manager]
-            s1[🆔 GitHub App ID]
-            s2[🔢 GitHub Installation ID]
-            s3[🔑 GitHub Private Key]
-            s4[🔐 GitHub Webhook Secret]
-        end
-
-        subgraph GCE[Google Compute Engine]
-            vm[🖥️ GitHub Actions Runner Instance]
-        end
-    end
-
-    %% Flows
-    user -->|Setup & Config| flask
-
-    gh_actions -->|1. Webhook: Job Queued| flask
-
-    %% Access Control: Only Cloud Run can Read/Write Secrets
-    flask <-->|Read & Write| Secrets
-
-    flask -->|2. Get Runner Token| gh_api
-    flask -->|3. Create Runner Instance| vm
-
-    vm -->|4. Register & Run Job| gh_actions
-
-    gh_actions -->|5. Webhook: Job Completed| flask
-    flask -->|6. Delete Runner Instance| vm
-
-    class CloudRun,Secrets,GCE gcp;
-    class gh_actions,gh_api gh;
-    class user user;
-```
-
-1.  **Webhook: Job Queued**: GitHub sends `workflow_job.queued` to the webhook.
-2.  **Get Runner Token**: App authenticates via stored Private Key to request a registration token.
-3.  **Create Runner Instance (VM)**: App calls Google Compute Engine API to spawn a templated instance.
-4.  **Register & Run Job**: Instance starts and registers with GitHub and runs the job.
-5.  **Webhook: Job Completed**: Instance deregisters with GitHub and is deleted.
-6.  **Delete Runner Instance (VM)**: App deletes the GCE instance upon `workflow_job.completed`.
-
-## 🔐 Environment Variables
-
-| Variable                  | Description                    | Required                                   |
-|---------------------------|--------------------------------|--------------------------------------------|
-| `SECRET_KEY`              | Session encryption             | No (generate with `secrets.token_hex(32)`) |
-| `GITHUB_APP_ID`           | GitHub App ID                  | Yes                                        |
-| `GITHUB_INSTALLATION_ID`  | App Installation ID            | Yes                                        |
-| `GITHUB_PRIVATE_KEY_PATH` | Path to App Private Key file   | Yes*                                       |
-| `GITHUB_PRIVATE_KEY`      | App Private Key content        | Yes*                                       |
-| `GITHUB_WEBHOOK_SECRET`   | Webhook signature secret       | Yes                                        |
-| `GOOGLE_CLOUD_PROJECT`    | Google Cloud Project ID        | Yes                                        |
-| `GOOGLE_CLOUD_ZONE`       | Default GCP zone for runners   | No (default: `us-central1-a`)              |
-| `PORT`                    | Web server port                | No (default: `8080`)                       |
-| `SETUP_USERNAME`          | Setup authentication username  | No (default: `cloud`)                      |
-| `SETUP_PASSWORD`          | Setup authentication password  | No (default: `GOOGLE_CLOUD_PROJECT`)       |
-
-*\*One of `GITHUB_PRIVATE_KEY` or `GITHUB_PRIVATE_KEY_PATH` must be set.*
-
-## 📡 API Endpoints
-
-*   `GET /setup/` - Setup interface (requires HTTP Basic Auth: username `cloud`, password is your Project ID)
-*   `GET /setup/callback` - OAuth callback handler (requires HTTP Basic Auth)
-*   `GET /setup/complete` - Post-installation handler (requires HTTP Basic Auth)
-*   `POST /setup/trigger-restart` - Restart application (requires HTTP Basic Auth)
-*   `POST /webhook` - Main GitHub webhook receiver (requires valid GitHub webhook signature)
-
-## 💻 Local Development
-
-To run the application locally for development or testing:
-
-1.  **Clone the repository**:
-    ```bash
-    git clone "https://github.com/Cyclenerd/google-cloud-github-runner.git"
-    cd google-cloud-github-runner
-    ```
-
-2.  **Create Virtual Environment**:
-    ```bash
-    python3 -m venv .venv
-    source .venv/bin/activate
-    ```
-
-3.  **Install dependencies**:
-    ```bash
-    pip install -r requirements.txt
-    pip install -r requirements-dev.txt
-    ```
-
-4.  **Set Environment Variables**:
-    You need at least your GCP Project ID.
-    ```bash
-    export GOOGLE_CLOUD_PROJECT=your-project-id
-    ```
-
-5. **Run tests**
-    ```bash
-    # Run all tests
-    pytest
-   ```
-
-6.  **Run the application**:
-    ```bash
-    python run.py
-    ```
-    The app will start at `http://localhost:8080`.
-
-
-7.  **Expose to Internet (Optional)**:
-    To receive webhooks from GitHub locally, use a tool like [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/):
-    ```bash
-    cloudflared tunnel run --token [TOKEN]
-    ```
-
-## 📄 License
-
-This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
-
-### Favicon
-
-The favicon was generated using the following graphics from Twitter Twemoji:
-
-*   **Graphics Title:** 1f431.svg
-*   **Graphics Author:** Copyright 2020 Twitter, Inc and other contributors ([https://github.com/twitter/twemoji](https://github.com/twitter/twemoji))
-*   **Graphics Source:** [https://github.com/twitter/twemoji/blob/master/assets/svg/1f431.svg](https://github.com/twitter/twemoji/blob/master/assets/svg/1f431.svg)
-*   **Graphics License:** CC-BY 4.0 ([https://creativecommons.org/licenses/by/4.0/](https://creativecommons.org/licenses/by/4.0/))
-
-## ⚖️ Disclaimer
-
-This project is an independent Open Source initiative and is not affiliated with, endorsed by, or associated with GitHub or Google Cloud. All trademarks and registered trademarks are the property of their respective owners.
+Maintained and sponsored by **[meshly.ai](https://meshly.ai)**, who run their
+CI fleet on it.

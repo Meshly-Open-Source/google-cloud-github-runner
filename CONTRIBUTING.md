@@ -1,83 +1,94 @@
-# Contributing to the Project
+# Contributing
 
-Thank you for considering contributing to our project! Your help and involvement are highly appreciated.
-This guide will help you get started with the contribution process.
+Thanks for looking. Two things to know before you spend any effort.
 
-## Table of Contents
+## 1. Go upstream first 🍴
 
-1. [Fork the Repository](#fork-the-repository-)
-2. [Clone Your Fork](#clone-your-fork-)
-3. [Create a New Branch](#create-a-new-branch-)
-4. [Submitting Changes](#submitting-changes-)
-5. [Create a Pull Request](#create-a-pull-request-)
-6. [Coding Style](#coding-style-)
-7. [Keep It Simple](#keep-it-simple-)
+This repository is a fork. The project is
+**[Cyclenerd/google-cloud-github-runner](https://github.com/Cyclenerd/google-cloud-github-runner)**,
+and that is where contributions belong.
 
-## Fork the Repository 🍴
+If you have a bug, a feature request, or a patch for the runner manager
+itself, open it upstream:
 
-Start by forking the repository. You can do this by clicking the "Fork" button in the
-upper right corner of the repository page. This will create a copy of the repository
-in your GitHub account.
+* **Issues** → <https://github.com/Cyclenerd/google-cloud-github-runner/issues>
+* **Pull requests** → <https://github.com/Cyclenerd/google-cloud-github-runner/pulls>
+* **Coding style** → upstream's
+  [CONTRIBUTING.md](https://github.com/Cyclenerd/google-cloud-github-runner/blob/master/CONTRIBUTING.md)
+  is the authority. For anything under `app/`, `gcp/` or `tools/`, follow it,
+  not this file.
 
-## Clone Your Fork 📥
+This is not a brush-off. A fix landed upstream reaches everyone running this
+tool, including us. A fix landed here reaches us and strands you on a fork.
+Upstream is also active — there is real work in flight there at any given
+time, some of it fixing things we ourselves reported — so an issue opened
+upstream has a decent chance of already being someone's problem.
 
-Clone your newly created fork of the repository to your local machine with the following command:
+**We will not merge a change here that should have gone upstream.** If you send
+us one, we will say so and point you there, which wastes a round trip for both
+of us. The one case where sending it here is right: the change is to a
+directory this fork adds (see below), and so has nowhere upstream to go yet.
 
-```bash
-git clone https://github.com/your-username/google-cloud-github-runner.git
-```
+## 2. If it really does belong here 📥
 
-## Create a New Branch 🌿
+This fork adds exactly two top-level paths of its own:
 
-Create a new branch for the specific issue or feature you are working on.
-Use a descriptive branch name:
+| Path | Scope |
+|---|---|
+| `ipfilter/` | Framework-agnostic IP allowlist — policy core, WSGI and ASGI adapters |
+| `docs/` | Operating notes for building and hosting your own manager image |
 
-```bash
-git checkout -b "feature-or-issue-name"
-```
+Changes to those are welcome here. Anything else is upstream's.
 
-## Submitting Changes 🚀
-Make your desired changes to the codebase.
+### How we evaluate a contribution
 
-Stage your changes using the following command:
+Stated plainly, because an unstated priority order is just a slower rejection.
+In this order:
 
-```bash
-git add .
-```
+1. **Does it benefit [meshly.ai](https://meshly.ai)?** We maintain this fork to
+   run our own CI, on our own time, and that is the budget it comes out of.
+2. **Does it benefit the wider community?** A change that is good for everyone
+   is better than one that is only good for us, and we would rather find the
+   general version of your idea than the narrow one.
 
-Commit your changes with a clear and concise commit message:
+Being honest about the order does not mean the second criterion is decoration.
+`ipfilter/` is built to be given away — vendor-neutral, no framework in the
+core, no hardcoded address ranges, named for what it does rather than for us —
+precisely so that it can be offered upstream as "add this directory". If your
+change makes it *more* generally useful, that helps on both counts.
 
-```bash
-git commit -m "A brief summary of the commit."
-```
+If the answer to (1) is no but (2) is a clear yes, the right home is upstream
+or your own fork, and we will tell you that rather than leave a PR open.
 
-## Create a Pull Request 🌟
+### What we need from a change
 
-Go to your forked repository on GitHub and click on the "New Pull Request" button.
-This will open a new pull request to the original repository.
+* **A test that fails without it.** For `ipfilter/` especially: it is a
+  fail-closed security control, so a bug in it does not misbehave, it denies
+  everyone — which looks exactly like a quiet day and is therefore invisible.
+  Run `python -m pytest -c ipfilter/pytest.ini ipfilter/tests`.
+* **No new runtime dependencies**, unless the PR argues for the one it adds.
+  `ipfilter/` is stdlib-only on purpose: it needs set membership, not
+  longest-prefix matching, so a C-extension trie would add a supply-chain
+  entry and a build step in exchange for nothing.
+* **Match the surrounding style.** `flake8 --max-line-length=127`, spaces,
+  no trailing whitespace — upstream's rules, which this fork follows.
+* **Please do not add tooling.** No new linters, formatters, type checkers,
+  taint analysers or language-specific scanners, and no CI jobs to run them.
+  We run a fair amount of that machinery on our own code and deliberately keep
+  it out of this repository: it is upstream's project, it has its own
+  conventions, and a fork that imposes its employer's toolchain on a volunteer
+  codebase is a nuisance to everyone downstream of it. A PR whose diff is
+  mostly configuration for a tool nobody asked for will be declined.
 
-## Coding Style 📝
+### Security
 
-Please follow these coding style rules to ensure consistency and maintainability:
+Do not open a public issue for a vulnerability. See [SECURITY.md](SECURITY.md).
+If it affects upstream's code rather than the directories listed above, report
+it upstream.
 
-### Python
-- **Linter:** Code must pass `flake8` with the following settings:
-  - `--max-line-length=127`
-  - Ignore `W292` (no new line at end of file) and `W503` (line break before binary operator).
-- **Indentation:** Use **spaces**.
-- **Formatting:** No trailing whitespace.
+## Licence
 
-### Terraform
-- **Format:** Run `terraform fmt -recursive` on the `gcp` directory.
-- **Linting & Security:** Code should pass `tflint` and `tfsec`.
-- **Indentation:** Use **spaces**.
+Upstream is [Apache-2.0](LICENSE) and so is everything added here.
+Contributions are accepted under the same terms.
 
-### Bash / Shell Scripts
-- **Linter:** Check all scripts with `shellcheck`.
-- **Indentation:** Use **tabs**.
-
-## Keep It Simple 👍
-
-Simplicity is key. When making changes, aim for clean, easy-to-understand code that benefits all users.
-
-Thank you for your contribution! ❤️
+Thanks again. ❤️
