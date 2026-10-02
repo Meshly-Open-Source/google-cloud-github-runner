@@ -1,6 +1,48 @@
-# AGENTS.md
+<!-- ╔══════════════════════════════════════════════════════════════════════╗
+     ║  FORK-MODIFIED FILE — DO NOT INCLUDE IN A PULL REQUEST TO UPSTREAM.  ║
+     ║  Doing so would silently replace a maintainer's own agent            ║
+     ║  instructions with ours. Check `git diff --name-only                 ║
+     ║  upstream/master...HEAD` before opening one.                         ║
+     ╚══════════════════════════════════════════════════════════════════════╝ -->
 
-This file provides guidance to AI agents when working with code in this repository.
+> # ⚠️ Read [`AGENTS-LOCAL.md`](AGENTS-LOCAL.md) first
+>
+> **This repository is a [soft fork](AGENTS-LOCAL.md#what-this-repository-is)**
+> of [Cyclenerd/google-cloud-github-runner](https://github.com/Cyclenerd/google-cloud-github-runner),
+> maintained by [meshly.ai](https://meshly.ai). It **tracks** upstream rather
+> than diverging from it: we add directories, we do not modify upstream's code,
+> and an upstream bump is meant to be a fast-forward.
+>
+> That constraint changes what you are allowed to do here, so the fork's rules
+> come first:
+>
+> | Read | For |
+> |---|---|
+> | **[`AGENTS-LOCAL.md`](AGENTS-LOCAL.md)** | **Repo-wide agent rules. Mandatory.** The read-only boundary, how to route a change, what must never go upstream. |
+> | [`RUNNER.xml`](RUNNER.xml) | Machine-readable manifest: per-path permissions, real route set, composition surface, build traps, what is and is not verified. |
+> | [`README.md`](README.md) | Human entry point; what the fork adds. |
+> | This file, below | Upstream's own architecture overview. Still accurate — the application is unmodified. |
+>
+> **The one rule:** upstream's tree is read-only here. Everything we add is a
+> new top-level path. If a change seems to require editing `app/`, `gcp/`,
+> `tools/`, the `Dockerfile` or `requirements.txt`, it belongs
+> [upstream](https://github.com/Cyclenerd/google-cloud-github-runner/issues) —
+> or it can be done by composition from outside upstream's tree.
+>
+> **What the fork adds:** `ipfilter/` (a framework-agnostic IP allowlist,
+> stdlib-only, not wired into the application) and `docs/` (notes on building
+> your own image). Both were written by an AI agent under human review; see
+> [the disclosure](README.md#%EF%B8%8F-ai-generated-code-disclosure).
+
+---
+
+# Upstream's AGENTS.md
+
+Everything below this line is upstream's, retained because it is accurate and
+useful: this fork does not modify the application it describes. Treat it as
+upstream's documentation — corrections to it belong upstream.
+
+---
 
 ## System Architecture
 

@@ -1,0 +1,546 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<runner-manifest
+  version="0.1.0"
+  signed-by="claude-opus-5-5"
+  repo="jw409/google-cloud-github-runner"
+  upstream="Cyclenerd/google-cloud-github-runner"
+  relationship="SOFT FORK - tracks upstream, adds directories, modifies no upstream code"
+  key-insight="The fork's value is the boundary, not the code. Additions never edits means a version bump is a fast-forward, not a merge of code we did not write.">
+
+<!--
+  AGENT-ORIENTED MANIFEST for the meshly.ai fork of google-cloud-github-runner:
+  ephemeral, just-in-time self-hosted GitHub Actions runners on Google Cloud.
+
+  THIS FILE IS ABOUT THE FORK. It tells an agent what is safe to touch here and
+  what must be sent upstream instead. It does NOT document the application —
+  upstream does, and duplicating it is how a fork's docs rot:
+
+    https://github.com/Cyclenerd/google-cloud-github-runner#readme
+
+  Human entry point: README.md. Authoritative for the fork's own code:
+  ipfilter/tests/, 149 tests.
+
+  THE ONE RULE: upstream's tree is read-only here. If your change belongs in
+  app/, gcp/, tools/, Dockerfile or requirements.txt, it belongs UPSTREAM. See
+  the contribution-routing section, and check it BEFORE writing code, not after.
+-->
+
+<index generated="2026-10-02" note="line numbers computed from this file, not estimated">
+  <section name="ai-generated-disclosure" line="44" what="Who wrote the fork's code. READ FIRST."/>
+  <section name="contribution-routing" line="70" what="Does your change go here or upstream? Decide BEFORE coding."/>
+  <section name="identity" line="110" what="What the project is, and what the fork is"/>
+  <section name="repo-map" line="150" what="Every top-level path, and whether you may touch it"/>
+  <section name="fork-invariants" line="180" what="Hard guarantees about the fork boundary"/>
+  <section name="application-facts" line="235" what="Routes, env vars, runtime shape - read from upstream's code"/>
+  <section name="additions" line="303" what="ipfilter/ and docs/ - the fork's own code"/>
+  <section name="build-and-deploy" line="377" what="Building your own image; the traps"/>
+  <section name="agent-empathy" line="436" what="What agents get wrong in this repo"/>
+  <section name="attestation" line="495" what="What was verified, and what was NOT"/>
+</index>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     AI-GENERATED DISCLOSURE
+     ═══════════════════════════════════════════════════════════════════════════ -->
+<ai-generated-disclosure priority="READ_FIRST">
+  <written-by>An AI coding agent (Claude), under human direction and review.</written-by>
+  <covers>Everything the fork adds: ipfilter/, docs/, RUNNER.xml, README.md, CONTRIBUTING.md, SECURITY.md.</covers>
+  <does-not-cover>
+    Upstream's code, which is the application. No path upstream owns is modified
+    by this fork, byte for byte, verified by git-object comparison against a
+    recorded baseline rather than asserted.
+  </does-not-cover>
+  <what-that-means>
+    If you are evaluating the runner manager, none of the generated code is in
+    your path - use upstream. If you are evaluating ipfilter/, it is a
+    fail-closed access control, the category where plausible-looking wrong code
+    is most expensive: a bug does not misbehave, it denies every caller, and
+    that is indistinguishable from a quiet day. Read the tests; do not deploy
+    it on our say-so.
+  </what-that-means>
+  <if-offered-upstream>
+    Any upstream pull request carries the same disclosure. A maintainer
+    deciding whether to spend review time is entitled to know how a patch was
+    produced.
+  </if-offered-upstream>
+</ai-generated-disclosure>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     CONTRIBUTION ROUTING: the first decision, not the last
+     ═══════════════════════════════════════════════════════════════════════════ -->
+<contribution-routing priority="READ_SECOND" note="Resolve this before writing code.">
+  <rule condition="bug-or-feature-in-the-runner-manager" send-to="UPSTREAM">
+    Anything about webhooks, VM lifecycle, runner registration, GitHub App
+    setup, Terraform under gcp/, the Dockerfile, or dependencies.
+    https://github.com/Cyclenerd/google-cloud-github-runner/issues
+
+    A fix landed upstream reaches everyone running this tool, including us. A
+    fix landed here reaches us and strands you on a fork.
+  </rule>
+  <rule condition="change-to-ipfilter-or-docs" send-to="THIS_FORK">
+    The only two paths that are ours. They have nowhere upstream to go yet.
+  </rule>
+  <rule condition="you-want-to-edit-an-upstream-file-to-make-your-change-work" send-to="STOP">
+    That is the situation the fork is arranged to prevent. Either the change
+    belongs upstream, or it can be done by COMPOSITION from outside upstream's
+    tree. ipfilter/ is the worked example: it needed to run before the
+    application's own routing, and it does that by wrapping the WSGI callable
+    from a consumer's entrypoint - zero upstream lines changed.
+  </rule>
+  <rule condition="unsure" send-to="UPSTREAM">
+    Cheaper to be redirected there than to maintain a divergence here.
+  </rule>
+  <evaluation-order note="Stated plainly in CONTRIBUTING.md, because an unstated priority is a slower rejection.">
+    <criterion n="1">Does it benefit meshly.ai? This fork is maintained to run our CI.</criterion>
+    <criterion n="2">Does it benefit the wider community?</criterion>
+    <note>If (1) is no and (2) is yes, the right home is upstream or your own fork, and we will say so.</note>
+  </evaluation-order>
+  <do-not-add note="A PR that is mostly tooling config will be declined.">
+    No new linters, formatters, type checkers, taint analysers or
+    language-specific scanners, and no CI jobs to run them. This is upstream's
+    project with upstream's conventions; a fork that imposes its employer's
+    toolchain on a volunteer codebase is a nuisance to everyone downstream.
+    Style here is upstream's: flake8 --max-line-length=127, spaces, no trailing
+    whitespace.
+  </do-not-add>
+</contribution-routing>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     IDENTITY
+     ═══════════════════════════════════════════════════════════════════════════ -->
+<identity>
+  <project>
+    <name>google-cloud-github-runner</name>
+    <author>Cyclenerd and contributors</author>
+    <licence>Apache-2.0</licence>
+    <tagline>Ephemeral just-in-time self-hosted GitHub Actions runners, native to Google Cloud.</tagline>
+    <shape>
+      A Flask application on Cloud Run receives GitHub webhooks and creates a
+      GCE VM per queued job from an instance template; the runner is ephemeral
+      and the VM goes away after the job. No Kubernetes, no cluster, no
+      long-lived runner pool. Developer-facing change is one line of workflow
+      YAML.
+    </shape>
+    <documentation authoritative="yes">https://github.com/Cyclenerd/google-cloud-github-runner#readme</documentation>
+  </project>
+  <fork>
+    <maintainer>meshly.ai</maintainer>
+    <why>
+      Somewhere to put code upstream does not have yet, without editing
+      upstream's code to do it. Not customisation - there are no behaviour
+      changes.
+    </why>
+    <what-it-buys>
+      A version bump stays a fast-forward instead of a merge of code we did not
+      write. Specifically it rules out a patch that applies WITH FUZZ, which
+      succeeds, now means something different, fails nothing, and is read by
+      nobody.
+    </what-it-buys>
+    <auditability>
+      You can audit this fork without reading a diff: we changed nothing and
+      added directories.
+    </auditability>
+    <default-branch>main (upstream's is master - the two differ, which is a trap for anything
+                    fetching by branch name)</default-branch>
+  </fork>
+</identity>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     REPO MAP: may I touch this?
+     ═══════════════════════════════════════════════════════════════════════════ -->
+<repo-map note="Top-level paths. 'READ_ONLY' means send the change upstream instead.">
+  <path name="app/" owner="upstream" status="READ_ONLY" what="The Flask application"/>
+  <path name="gcp/" owner="upstream" status="READ_ONLY" what="Terraform for the GCP resources"/>
+  <path name="tools/" owner="upstream" status="READ_ONLY"/>
+  <path name="tests/" owner="upstream" status="READ_ONLY" what="Upstream's suite. Needs Flask installed."/>
+  <path name="Dockerfile" owner="upstream" status="READ_ONLY" what="Two-stage Alpine build, runs gunicorn run:app"/>
+  <path name="requirements.txt" owner="upstream" status="READ_ONLY" what="The ONLY dependency manifest. Pinned exactly."/>
+  <path name="requirements-dev.txt" owner="upstream" status="READ_ONLY"/>
+  <path name="pytest.ini" owner="upstream" status="READ_ONLY" what="testpaths=tests, --cov=app. ipfilter carries its own."/>
+  <path name=".github/" owner="upstream" status="READ_ONLY" what="Upstream's CI. Do not add jobs here."/>
+  <path name="LICENSE" owner="upstream" status="READ_ONLY" what="Apache-2.0. Must travel with any redistributed build."/>
+  <path name="AGENTS.md" owner="upstream" status="DECLARED_DIVERGENCE" what="Fork header prepended; upstream's architecture overview retained below it. NEVER include in an upstream PR."/>
+  <path name="img/ .devcontainer/ .editorconfig .env.example .dockerignore .gcloudignore .gitignore"
+        owner="upstream" status="READ_ONLY"/>
+  <path name="CLOUD_SHELL_TUTORIAL.md CODE_OF_CONDUCT.md" owner="upstream" status="READ_ONLY"/>
+
+  <path name="ipfilter/" owner="fork" status="OURS" what="Framework-agnostic IP allowlist. Stdlib only."/>
+  <path name="docs/" owner="fork" status="OURS" what="Self-hosting notes: Artifact Registry, Cloud Build caching"/>
+  <path name="RUNNER.xml" owner="fork" status="OURS" what="This file"/>
+  <path name="AGENTS-LOCAL.md" owner="fork" status="OURS" what="Repo-wide agent rules. Tracked, not gitignored. Mandatory read."/>
+  <path name="AGENTS-LOCAL-USER.md" owner="operator" status="UNTRACKED" what="Optional per-operator preferences. Excluded via .git/info/exclude, not .gitignore (which is upstream's). Higher precedence than AGENTS-LOCAL.md, but cannot relax a hard rule."/>
+
+  <path name="README.md" owner="upstream" status="DECLARED_DIVERGENCE" what="Rewritten to describe the fork"/>
+  <path name="CONTRIBUTING.md" owner="upstream" status="DECLARED_DIVERGENCE" what="Routes contributions upstream"/>
+  <path name="SECURITY.md" owner="upstream" status="DECLARED_DIVERGENCE" what="Routes reports by code ownership"/>
+</repo-map>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     FORK INVARIANTS
+     ═══════════════════════════════════════════════════════════════════════════ -->
+<fork-invariants>
+  <invariant id="additions-never-edits" severity="HARD_LIMIT">
+    Every path upstream owns is byte-identical here, EXCEPT an explicitly
+    baselined set of top-level .md files, each pinned by its exact blob hash.
+    Everything the fork adds is a new top-level path.
+
+    State the exception when you state the invariant. "Nothing differs" is a
+    stronger claim than what is enforced, and a pass read as the stronger claim
+    is worse than no check.
+  </invariant>
+
+  <invariant id="enforced-not-promised" severity="GUARANTEED">
+    Checked by comparing git object ids against a recorded baseline of
+    upstream's tree. That is a Merkle comparison: `app` matching means every
+    file beneath it matches, recursively, byte for byte.
+  </invariant>
+
+  <invariant id="declarable-paths-are-structurally-limited" severity="HARD_LIMIT">
+    Only top-level .md BLOBS can be declared as divergences. A nested path or a
+    non-.md path cannot be declared no matter how the baseline is edited, so
+    app/, requirements.txt, Dockerfile and .github/ can never become
+    exceptions.
+
+    This is the restriction that actually protects the application. An
+    exclusion list would fail open on the next vendor path somebody wanted to
+    touch; a structural predicate plus per-path hash pinning does not.
+  </invariant>
+
+  <invariant id="re-editing-a-declared-file-still-fails" severity="GUARANTEED">
+    A declared divergence is pinned to an exact blob hash, so editing it again
+    fails the check until it is deliberately re-baselined. Declaring a file is
+    not a standing permission to change it.
+  </invariant>
+
+  <invariant id="no-patch-series" severity="ARCHITECTURAL">
+    No patches, no cherry-picks, no merge commits carrying upstream changes we
+    rewrote. Upstream is tracked by commit. A patch series is worse than a fork
+    because the bad outcome is a patch applying with fuzz.
+  </invariant>
+
+  <invariant id="no-new-runtime-dependencies" severity="GUARANTEED">
+    requirements.txt is upstream's and unmodified. ipfilter/ is stdlib-only, so
+    an addition of ours can never silently widen an upstream pin.
+  </invariant>
+
+  <invariant id="the-fork-does-not-wire-itself-in" severity="ARCHITECTURAL">
+    ipfilter/ is not imported by, referenced by, or enabled in the application.
+    That is why app/ does not need to move. Enabling it is a composition step
+    in a consumer's own deployment entrypoint.
+  </invariant>
+</fork-invariants>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     APPLICATION FACTS: read from upstream's code, not from its prose
+     ═══════════════════════════════════════════════════════════════════════════ -->
+<application-facts note="Facts an agent needs to compose with the app. Upstream's README is authoritative for behaviour.">
+
+  <composition-surface note="Why wrapping works without editing anything">
+    <fact file="app/__init__.py" what="create_app() is a FACTORY: it builds the Flask object inside the
+          function and returns it. There is no module-level Flask singleton, so importing upstream
+          does not commit a consumer to upstream's wiring."/>
+    <fact what="Import is side-effect-free in the ways that matter: config reads use os.environ.get,
+          never the raising subscript form, so an import cannot die on missing configuration."/>
+    <fact what="Zero after_request and zero errorhandler hooks under app/. The only hook is a
+          before_request in app/routes/setup.py, blueprint-scoped to /setup/*. Nothing upstream sits
+          between a WSGI wrapper and a request."/>
+    <fact what="The container runs `gunicorn run:app`, so upstream's entrypoint is merely 'a module
+          exposing an app attribute'. A consumer provides its own module of the same shape."/>
+  </composition-surface>
+
+  <routes note="The complete route set, enumerated from app/. Useful as the coverage target for an
+                ipfilter policy table - a table missing any of these fails startup.">
+    <route path="/" methods="GET" blueprint="app"/>
+    <route path="/robots.txt" methods="GET" blueprint="app"/>
+    <route path="/favicon.ico" methods="GET" blueprint="app"/>
+    <route path="/webhook" methods="POST" blueprint="webhook"
+           auth="HMAC X-Hub-Signature-256, verified by an INLINE CALL inside the handler
+                 (app/utils/security.py), not a decorator and not a before_request"/>
+    <route path="/setup/" methods="GET" blueprint="setup" auth="before_request on the blueprint"/>
+    <route path="/setup/callback" methods="GET" blueprint="setup"/>
+    <route path="/setup/complete" methods="GET" blueprint="setup"/>
+    <route path="/setup/trigger-restart" methods="POST" blueprint="setup"/>
+    <does-not-exist path="/runner/preempted" note="There is no preemption-notice route at the pinned
+           commit. A Spot-preempted VM posting to one gets a 404, silently. Relevant upstream work
+           exists in flight; check before building it here."/>
+  </routes>
+
+  <ordering-consequence note="Load-bearing for any filter">
+    The /webhook HMAC check is an inline call inside the handler. A WSGI
+    wrapper therefore runs BEFORE it. That ordering is correct for defence in
+    depth, and it is also the hazard: a bug in the outer layer blocks a
+    legitimate caller before HMAC can validate them, making the outer layer
+    strictly more load-bearing than the control it backstops. Deploy log_only
+    first, with a "no webhooks accepted recently" alarm in place BEFORE
+    enforcing.
+  </ordering-consequence>
+
+  <environment-variables note="Names read from app/. See upstream's README for semantics.">
+    <var name="GOOGLE_CLOUD_PROJECT"/><var name="GOOGLE_CLOUD_ZONE"/><var name="GCP_REGION"/>
+    <var name="GITHUB_APP_ID"/><var name="GITHUB_INSTALLATION_ID"/>
+    <var name="GITHUB_PRIVATE_KEY"/><var name="GITHUB_PRIVATE_KEY_PATH"/>
+    <var name="GITHUB_WEBHOOK_SECRET"/><var name="GITHUB_RUNNER_GROUP"/>
+    <var name="SECRET_KEY"/><var name="SETUP_USERNAME"/><var name="SETUP_PASSWORD"/>
+    <var name="K_SERVICE" note="Cloud Run injects this"/>
+  </environment-variables>
+
+  <runtime-shape>
+    <fact what="Python 3.14-alpine base, two-stage build with a wheelhouse so the production stage
+          needs no compiler. Runs as a non-root appuser."/>
+    <fact what="GUNICORN_CMD_ARGS bakes --bind 0.0.0.0:$PORT with $PORT EXPANDED AT BUILD TIME to
+          8080. It looks like a runtime reference and is not: changing the Cloud Run port alone
+          leaves gunicorn bound to 8080 and the container failing its startup probe. Change both or
+          neither."/>
+    <fact what="1 worker, 8 threads, timeout 0. A filter must therefore be thread-safe and hold no
+          per-request state; ipfilter holds none."/>
+    <fact what="Scale-to-zero is normal, so cold-start cost and image-pull failures surface at
+          unrelated times rather than at deploy."/>
+  </runtime-shape>
+</application-facts>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     ADDITIONS: the fork's own code
+     ═══════════════════════════════════════════════════════════════════════════ -->
+<additions>
+  <addition name="ipfilter/" status="not wired in" dependencies="none (stdlib)">
+    <tagline>An IP allowlist you can be wrong about safely.</tagline>
+    <design-notes>ipfilter/__init__.py</design-notes>
+    <specification>ipfilter/tests/ - 149 tests. The prose is not authoritative; these are.</specification>
+    <proof-command><![CDATA[python -m pytest -c ipfilter/pytest.ini ipfilter/tests]]></proof-command>
+    <proof-command-note>
+      Pass the directory EXPLICITLY. testpaths resolves against pytest's inferred rootdir, which
+      differs between a bare run and one with arguments; a bare run picks up the project's own
+      Flask-dependent suite and fails collection. A proof command that works only when invoked one
+      particular way is not a proof command.
+    </proof-command-note>
+    <vendor-neutral-by-design>
+      Named for what it does rather than for us, imports no web framework, and
+      takes no dependency on this application, so an upstream offer is "add
+      exactly this directory" - no renames, no imports to unpick.
+    </vendor-neutral-by-design>
+    <key-properties>
+      <property id="no-baked-ranges">
+        Zero CIDRs in the package, asserted by a test walking every module. A library default range
+        set would turn one consumer's allowlist into a silent default for every future consumer. The
+        consumer supplies named sets; a policy naming an unsupplied set is UNEVALUABLE, which under
+        fail-closed denies.
+      </property>
+      <property id="three-decisions">
+        allow / deny / UNEVALUABLE. "Not on the list" and "we have no list" have opposite
+        implications and different owners; a single denied counter conflates them, and the
+        conflation is how a stopped range refresher gets investigated as an attack. The collapse to
+        a block happens at the enforcement edge as a configured fail mode, reason preserved.
+      </property>
+      <property id="separate-address-families">
+        v4 and v6 get separate compiled tables and parse paths. inet_pton(AF_INET6, "1.2.3.4")
+        RAISES, so a single v6-shaped parse path puts every IPv4 caller in an except branch and,
+        under fail-closed, denies them all silently.
+      </property>
+      <property id="chain-index-required">
+        No default anywhere. A default is correct for exactly one proxy topology and silently wrong
+        for the rest; wrong here denies 100% of callers. An out-of-range index reports
+        chain-shorter-than-index rather than falling back, because a fallback hides exactly that.
+        MEASURE it from a recorded chain before enforcing.
+      </property>
+      <property id="every-route-explicit">
+        An uncovered route is a STARTUP failure, asserted against the route set read from the
+        running application rather than a grep (a grep cannot see a conditionally registered
+        blueprint or a route built in a loop). A route that takes no address check is declared as
+        such and must carry a written justification. A table that lets unknown routes through is an
+        inclusion list, and it fails open on the route added next week by someone who never read it.
+      </property>
+      <property id="evidence-is-a-requirement">
+        Every decision emits one JSON line carrying the full chain, the index used, the derived
+        address, the peer, the policy and a discriminated reason. A fail-closed filter fails
+        QUIETLY - no error, no exception, no failed request - so the record is the only evidence the
+        control works and the only way a wrong index is diagnosable. json.dumps also means an
+        attacker-supplied header cannot forge a second log line.
+      </property>
+      <property id="adapters-cannot-drift">
+        All decisions live in enforcement.py; the WSGI and ASGI adapters only translate transport. A
+        14-case parity test asserts identical verdicts, because two adapters that each implement the
+        decision will drift and the drift surfaces on whichever stack gets less traffic.
+      </property>
+    </key-properties>
+  </addition>
+
+  <addition name="docs/" status="prose">
+    <file name="docs/artifact-registry.md" what="Repository layout, digest pinning, and the cleanup
+          policy that deletes the digest production is pinned to"/>
+    <file name="docs/cloud-build-caching.md" what="Why COPY order is the whole cache, --cache-from
+          failing silently, and what the source tarball cannot carry"/>
+  </addition>
+</additions>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     BUILD AND DEPLOY
+     ═══════════════════════════════════════════════════════════════════════════ -->
+<build-and-deploy note="Only relevant if you build your own image. If you do not have that concern,
+                        use upstream's Cloud Build template - less work, and maintained.">
+  <why-self-build>
+    One reason, and it is not customisation: the tree you review and the
+    artifact you run should be the same thing. A build invoked from outside
+    your repository is a build nobody reviews - the same defect shape as a
+    deploy script generated at deploy time.
+  </why-self-build>
+  <trap id="no-git-in-the-build">
+    `gcloud builds submit` uploads a SOURCE TARBALL. Inside the build there is
+    no .git, no commit, no submodule state. Any check needing git objects must
+    run in the wrapper that invokes the submit, not in the build config - and
+    that wrapper must be the documented entry point, or the check is one typed
+    command away from being skipped.
+  </trap>
+  <trap id="empty-submodule-copies-clean">
+    An uninitialised submodule is an EMPTY DIRECTORY and COPY of one succeeds.
+    The build then produces an image missing the code it was meant to contain,
+    with no error anywhere. Same shape as a guard that passes having checked
+    nothing.
+  </trap>
+  <trap id="copy-order-is-the-cache">
+    Upstream copies only requirements.txt before the expensive `pip wheel`
+    layer, so a code edit does not recompile every wheel. Copy source in before
+    that RUN - which looks tidier - and every one-line change pays the full
+    compile. Add your own code AFTER upstream's, since upstream changes rarely
+    and yours changes often.
+  </trap>
+  <trap id="cache-from-fails-silently">
+    An unpullable --cache-from source is not an error. The build proceeds
+    without a cache and is simply slower, indistinguishable from a cache miss.
+    A build quietly 4x slower forever is a cost nobody notices because nothing
+    failed.
+  </trap>
+  <trap id="cleanup-deletes-your-pinned-digest">
+    A digest-pinned image is UNTAGGED from Artifact Registry's point of view, so
+    a policy deleting untagged images deletes what production runs. Nothing
+    fails until the next cold start, at an unrelated time, with no deploy having
+    happened.
+  </trap>
+  <trap id="licence-must-be-in-the-image">
+    Apache-2.0 permits redistributing a derivative image provided the licence
+    travels with it. Ensure LICENSE lands inside the image beside the code it
+    covers, and that no .dockerignore rule excludes it. It is a one-line
+    omission that turns permitted redistribution into unlicensed, silently.
+  </trap>
+  <trap id="runtime-identity-needs-read">
+    The runtime service account needs artifactregistry.reader on the
+    repository, which is easy to miss when build and runtime are different
+    identities. Symptom: the deploy succeeds and the revision never becomes
+    healthy, with the pull failure in the revision's logs rather than the deploy
+    output.
+  </trap>
+  <detail>docs/artifact-registry.md, docs/cloud-build-caching.md</detail>
+</build-and-deploy>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     AGENT EMPATHY
+     ═══════════════════════════════════════════════════════════════════════════ -->
+<agent-empathy note="Observed failure modes in THIS repo. Read before editing.">
+
+  <struggle problem="Editing an upstream file because it is the shortest path">
+    It is always the shortest path, and it is the one thing the fork exists to
+    prevent. Ask whether the change can be made by composition from outside
+    upstream's tree. For a request-path concern the answer is usually yes:
+    create_app() is a factory and there are no app-level request hooks, so
+    wrapping the WSGI callable gets you in front of everything.
+  </struggle>
+
+  <struggle problem="Writing a fork-specific feature into app/ 'for now'">
+    There is no "for now". The divergence check fails, and if it is softened to
+    let the change through, the next upstream bump becomes a merge.
+  </struggle>
+
+  <struggle problem="Adding a linter, formatter or CI job">
+    Deliberately absent. This is upstream's project with upstream's
+    conventions; style is flake8 --max-line-length=127. See the contribution-routing / do-not-add sections.
+  </struggle>
+
+  <struggle problem="Running `pytest` and reading the result">
+    Bare pytest picks up upstream's suite, which needs Flask installed and
+    fails collection. That is an environment failure, not a fork failure. Use
+    the explicit proof command for ipfilter.
+  </struggle>
+
+  <struggle problem="Treating a green test run as proof the tests work">
+    They are a claim until a mutation turns them red. During this package's own
+    development a sed-based mutation silently failed to apply and reported 149
+    passed - which read exactly like a surviving mutant. Assert the mutation
+    LANDED before believing the result.
+  </struggle>
+
+  <struggle problem="Reading an exit code through a pipe">
+    `cmd | tail; echo $?` reports tail's status, not cmd's. It produced wrong
+    claims in this session. Redirect to a file, or capture the status directly.
+  </struggle>
+
+  <struggle problem="Assuming the fork's default branch matches upstream's">
+    This fork is `main`; upstream is `master`. Anything fetching by branch name
+    needs the right one for each, and the pinned commit resolves on both.
+  </struggle>
+
+  <struggle problem="Building /runner/preempted here because a VM 404s on it">
+    Check upstream's open work first. A preemption notice is the kind of thing
+    that belongs upstream, and duplicating in-flight upstream work is how a
+    fork acquires a divergence it then has to maintain.
+  </struggle>
+
+  <struggle problem="Reading a byte-identity pass as 'nothing differs'">
+    Three top-level .md files are declared divergences, each pinned by hash.
+    The guarantee is narrower than the headline; state the exception when you
+    state the invariant.
+  </struggle>
+</agent-empathy>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     ATTESTATION
+     ═══════════════════════════════════════════════════════════════════════════ -->
+<attestation>
+  <current-session date="2026-10-02" model="claude-opus-5-5" human-reviewer="jw">
+    <scope>ipfilter/ and docs/ added; RUNNER.xml and AGENTS-LOCAL.md added; README.md,
+           CONTRIBUTING.md, SECURITY.md and AGENTS.md diverged (AGENTS.md by a prepended fork
+           header, upstream's architecture overview retained below it). No upstream code path
+           modified.</scope>
+
+    <verified>
+      <item evidence="pytest exit 0, 149 passed">ipfilter test suite passes</item>
+      <item evidence="flake8 --max-line-length=127 --extend-ignore=W292,W503, real exit 0, zero findings">
+        Conforms to upstream's style rules. No tooling config added to this repository.
+      </item>
+      <item evidence="12 mutants, each applied under an assert-landed guard, each turning the suite red">
+        The tests detect: v6-only match table; chain_index ignored; chain-too-short falling back;
+        unevaluable allowed; uncovered route allowed; vacuous zero-route assertion; non-strict
+        prefix parsing; empty set skipped; v6 port-strip mangling; key=value log format; the WSGI
+        adapter never blocking; exact-over-prefix precedence lost.
+      </item>
+      <item evidence="pristine restore re-run, 149 passed">No mutation leaked into the tree</item>
+      <item evidence="git diff --name-only against the merge base">
+        Changed paths are exactly four top-level .md files (README, CONTRIBUTING, SECURITY,
+        AGENTS) plus the two new directories and the two new top-level .md/.xml files. No
+        non-.md upstream path appears in the diff.
+      </item>
+      <item evidence="test walking every module's module-level strings">Zero CIDRs in ipfilter/</item>
+      <item evidence="14-case parity test across both adapters">WSGI and ASGI agree</item>
+      <item evidence="routes enumerated from app/routes/ and app/__init__.py">
+        The route list in application-facts is read from code, not from upstream's prose
+      </item>
+      <item evidence="git ls-remote --heads origin">main is the only branch on the fork</item>
+      <item evidence="xml.etree parse plus per-section line check against the bytes on disk">
+        This manifest is well-formed, and every index line number points at the section it names.
+        Two numbering bugs were found and fixed that way: a scanner matching a tag reference
+        INSIDE a comment, and numbers computed before a later edit removed a line.
+      </item>
+    </verified>
+
+    <not-verified note="Listed so nobody infers it from the above.">
+      <item>No deployment. Nothing here is wired into a running service in this repository.</item>
+      <item>chain_index has not been measured against any real proxy chain. Until it is, nothing
+            should enforce - log_only only.</item>
+      <item>No load or latency measurement. Matching cost is argued from operation count, not
+            benchmarked.</item>
+      <item>No independent security review. Written by an AI agent, reviewed by one human.</item>
+      <item>No upstream pull request opened; upstream has not evaluated any of this.</item>
+      <item>The declared-divergence baseline mechanism is described here but lives in the consuming
+            infrastructure repository, not in this one. Its own verification belongs there.</item>
+    </not-verified>
+  </current-session>
+</attestation>
+
+</runner-manifest>

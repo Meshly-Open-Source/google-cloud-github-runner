@@ -4,8 +4,14 @@
 [![Badge: Python](https://img.shields.io/badge/Python-3670A0?logo=python&logoColor=ffdd54)](#readme)
 [![Badge: Google Cloud](https://img.shields.io/badge/Google%20Cloud-%234285F4.svg?logo=google-cloud&logoColor=white)](#readme)
 
-A fork of **[Cyclenerd/google-cloud-github-runner](https://github.com/Cyclenerd/google-cloud-github-runner)** —
+A **soft fork** of **[Cyclenerd/google-cloud-github-runner](https://github.com/Cyclenerd/google-cloud-github-runner)** —
 ephemeral, just-in-time self-hosted GitHub Actions runners on Google Cloud.
+
+*Soft fork* is the accurate term and it carries the working model: we **track**
+upstream rather than diverge from it, we **add** directories rather than modify
+upstream's code, an upstream bump is meant to be a **fast-forward**, and our
+additions are written to be **given back**. We are explicitly not taking
+ownership of our own line of the application.
 
 **Read upstream's documentation, not this file.** Everything about what the
 tool is, how to deploy it, how to configure it, its architecture, its
@@ -26,6 +32,9 @@ this README, `CONTRIBUTING.md` and `SECURITY.md`. Treat it accordingly:
   so nothing generated here has touched the application. That is verified
   mechanically, not asserted — see
   [the invariant](#the-additions-never-edits-invariant).
+* **Agents: read [`AGENTS-LOCAL.md`](AGENTS-LOCAL.md) before editing anything
+  here.** It is repo-wide and states the read-only boundary, how to route a
+  change, and what must never be included in an upstream pull request.
 * **Review it before you trust it.** `ipfilter/` is a fail-closed access
   control, which is exactly the category where plausible-looking wrong code is
   most expensive: a bug does not misbehave, it denies every caller, and that
@@ -52,7 +61,8 @@ Nothing is changed. Two directories are added.
 |---|---|---|
 | ➕ | **Framework-agnostic IP allowlist** — a pure policy core plus WSGI and ASGI adapters. Stdlib only, no web framework in the core, and no address ranges anywhere in the package. | [`ipfilter/`](ipfilter/) |
 | ➕ | **Self-hosting notes** — Artifact Registry layout and Cloud Build caching for running your own build of the manager image. | [`docs/`](docs/) |
-| ✏️ | This file, [`CONTRIBUTING.md`](CONTRIBUTING.md) and [`SECURITY.md`](SECURITY.md), to say what the fork is and where to send patches. | — |
+| ➕ | **Agent instructions** — repo-wide rules for AI agents working here, plus a machine-readable manifest. | [`AGENTS-LOCAL.md`](AGENTS-LOCAL.md), [`RUNNER.xml`](RUNNER.xml) |
+| ✏️ | This file, [`CONTRIBUTING.md`](CONTRIBUTING.md), [`SECURITY.md`](SECURITY.md) and [`AGENTS.md`](AGENTS.md), to say what the fork is and where to send patches. | — |
 | ✏️ | Default branch is `main`. Upstream's is `master`. | — |
 
 That is the complete list, and it is mechanically enforced rather than
@@ -87,7 +97,7 @@ nothing; we added directories.
 
 Checked by comparing git object ids against a recorded baseline of upstream's
 tree, which is a Merkle comparison — `app` matching means every file beneath
-it matches, recursively. The three documentation exceptions are declared
+it matches, recursively. The four documentation exceptions are declared
 individually and pinned, so editing one *again* fails the check until it is
 re-baselined, and a non-`.md` or nested path cannot be declared at all. That
 last restriction is the one that actually protects `app/`.
