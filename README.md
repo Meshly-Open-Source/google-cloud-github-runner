@@ -64,7 +64,7 @@ accounting.
 |---|---|---|
 | ➕ | **IP allowlist** — a policy core plus WSGI and ASGI adapters, stdlib-only, framework-free, no address ranges baked in. Not wired into the application. | [`ipfilter/`](ipfilter/) |
 | ➕ | **Self-hosting notes** — Artifact Registry layout and Cloud Build caching for running your own build of the manager image. | [`docs/`](docs/) |
-| ➕ | **Agent instructions** — repo-wide rules for AI agents working here, plus a machine-readable manifest. | [`AGENTS-LOCAL.md`](AGENTS-LOCAL.md), [`RUNNER.xml`](RUNNER.xml) |
+| ➕ | **Agent instructions** — an entry point that says to *read and evaluate* upstream's `AGENTS.md` rather than obey it, repo-wide rules, and a machine-readable manifest. | [`CLAUDE.md`](CLAUDE.md), [`AGENTS-LOCAL.md`](AGENTS-LOCAL.md), [`RUNNER.xml`](RUNNER.xml) |
 | ✏️ | This file, [`CONTRIBUTING.md`](CONTRIBUTING.md), [`SECURITY.md`](SECURITY.md) and [`AGENTS.md`](AGENTS.md), to say what the fork is and where to send patches. | — |
 | ✏️ | Default branch is `main`. Upstream's is `master`. | — |
 

@@ -91,6 +91,11 @@ the runner manager goes
 Filing an upstream bug on the fork makes it look tracked while nobody who can
 fix it is reading it.
 
+Entry point for agents: **[`CLAUDE.md`](CLAUDE.md)** — it says to *read and
+evaluate* `AGENTS.md` (a diverged vendor file: accurate about the application,
+written for a repository where the tree is writable) and to follow this file
+instead.
+
 Detailed, machine-readable manifest: **[`RUNNER.xml`](RUNNER.xml)** — repo map
 with per-path permissions, the application's real route set and env vars, the
 composition surface, build traps, and what has and has not been verified. Read
@@ -105,8 +110,8 @@ it before working in this repo. Human entry point: [`README.md`](README.md).
 | Status | Paths |
 |---|---|
 | **READ-ONLY — send changes upstream** | `app/` `gcp/` `tools/` `tests/` `Dockerfile` `requirements*.txt` `pytest.ini` `.github/` `.gitignore` `.dockerignore` `.gcloudignore` `.editorconfig` `.env.example` `.devcontainer/` `img/` `LICENSE` `CLOUD_SHELL_TUTORIAL.md` `CODE_OF_CONDUCT.md` |
-| **OURS — change freely** | every top-level path the fork adds. Today: `ipfilter/` `docs/` `RUNNER.xml` `AGENTS-LOCAL.md`. Expect this to grow; `README.md` holds the canonical list. |
-| **DECLARED DIVERGENCE — pinned, re-baseline to change** | `README.md` `CONTRIBUTING.md` `SECURITY.md` `AGENTS.md` |
+| **OURS — change freely** | every top-level path the fork adds. Today: `ipfilter/` `docs/` `RUNNER.xml` `CLAUDE.md` `AGENTS-LOCAL.md` `.github/ATTRIBUTION.md`. Expect this to grow; `README.md` holds the canonical list. |
+| **DECLARED DIVERGENCE — pinned, re-baseline to change** | `README.md` `CONTRIBUTING.md` `SECURITY.md` `AGENTS.md`, and community health files under `.github/` — **never** `.github/workflows/` |
 
 This is enforced mechanically, by comparing git object ids against a recorded
 baseline of upstream's tree — a Merkle comparison, so `app` matching means
