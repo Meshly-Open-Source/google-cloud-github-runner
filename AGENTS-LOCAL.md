@@ -110,7 +110,7 @@ it before working in this repo. Human entry point: [`README.md`](README.md).
 | Status | Paths |
 |---|---|
 | **READ-ONLY — send changes upstream** | `app/` `gcp/` `tools/` `tests/` `Dockerfile` `requirements*.txt` `pytest.ini` `.github/` `.gitignore` `.dockerignore` `.gcloudignore` `.editorconfig` `.env.example` `.devcontainer/` `img/` `LICENSE` `CLOUD_SHELL_TUTORIAL.md` `CODE_OF_CONDUCT.md` |
-| **OURS — change freely** | every top-level path the fork adds. Today: `ipfilter/` `docs/` `RUNNER.xml` `CLAUDE.md` `AGENTS-LOCAL.md` `.github/ATTRIBUTION.md`. Expect this to grow; `README.md` holds the canonical list. |
+| **OURS — change freely** | every top-level path the fork adds. Today: `ipfilter/` `docs/` `scripts/` `.claude/` `justfile` `RUNNER.xml` `CLAUDE.md` `AGENTS-LOCAL.md` `.github/ATTRIBUTION.md`. Expect this to grow; `README.md` holds the canonical list. |
 | **DECLARED DIVERGENCE — pinned, re-baseline to change** | `README.md` `CONTRIBUTING.md` `SECURITY.md` `AGENTS.md`, and community health files under `.github/` — **never** `.github/workflows/` |
 
 This is enforced mechanically, by comparing git object ids against a recorded
@@ -165,8 +165,13 @@ permission to change it.
    failure, not a fork failure. For the IP allowlist:
 
    ```bash
-   python -m pytest -c ipfilter/pytest.ini ipfilter/tests
+   just check    # test + lint + boundary, the pre-push gate
+   just test     # the proof command on its own
    ```
+
+   `just` detects the interpreter and prefers one that already has `pytest`,
+   because `python` is not on PATH everywhere and a recipe that works only in
+   the author's shell fails for the next person with exit 127.
 
    Pass the directory explicitly: `testpaths` resolves against pytest's
    inferred rootdir, which differs between a bare run and one with arguments.
@@ -198,7 +203,11 @@ Never include:
 - `AGENTS-LOCAL.md`, `AGENTS-LOCAL-USER.md` — fork-internal.
 - `README.md`, `CONTRIBUTING.md`, `SECURITY.md` — ours describe the fork and
   would overwrite upstream's.
-- `RUNNER.xml`, `docs/` — about the fork and about building our own image.
+- `RUNNER.xml`, `CLAUDE.md`, `docs/` — about the fork and about building our
+  own image.
+- `justfile`, `scripts/`, `.claude/` — our task runner, our tooling and our
+  hooks. Upstream has its own conventions and did not ask for a task runner;
+  `.claude/` is agent configuration for this fork specifically.
 
 Before opening an upstream PR, check the file list and not your intent:
 

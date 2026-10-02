@@ -30,12 +30,12 @@
   <section name="contribution-routing" line="70" what="Does your change go here or upstream? Decide BEFORE coding."/>
   <section name="identity" line="111" what="What the project is, and what the fork is"/>
   <section name="repo-map" line="177" what="Every top-level path, and whether you may touch it"/>
-  <section name="fork-invariants" line="209" what="Hard guarantees about the fork boundary"/>
-  <section name="application-facts" line="264" what="Routes, env vars, runtime shape - read from upstream's code"/>
-  <section name="additions" line="332" what="ipfilter/ and docs/ - the fork's own code"/>
-  <section name="build-and-deploy" line="406" what="Building your own image; the traps"/>
-  <section name="agent-empathy" line="465" what="What agents get wrong in this repo"/>
-  <section name="attestation" line="524" what="What was verified, and what was NOT"/>
+  <section name="fork-invariants" line="212" what="Hard guarantees about the fork boundary"/>
+  <section name="application-facts" line="267" what="Routes, env vars, runtime shape - read from upstream's code"/>
+  <section name="additions" line="335" what="ipfilter/ and docs/ - the fork's own code"/>
+  <section name="build-and-deploy" line="409" what="Building your own image; the traps"/>
+  <section name="agent-empathy" line="468" what="What agents get wrong in this repo"/>
+  <section name="attestation" line="527" what="What was verified, and what was NOT"/>
 </index>
 
 <!-- ═══════════════════════════════════════════════════════════════════════════
@@ -129,8 +129,8 @@
                     'we barely touch upstream' survives past the point of being true.">
       <upstream-code-paths-modified>0</upstream-code-paths-modified>
       <upstream-doc-paths-diverged>4 top-level, plus community health files under .github/ (never workflows)</upstream-doc-paths-diverged>
-      <directories-added>2</directories-added>
-      <root-files-added>3</root-files-added>
+      <directories-added>4</directories-added>
+      <root-files-added>4</root-files-added>
       <verdict>Soft on code, MEDIUM on documentation.</verdict>
       <what-keeps-it-soft>
         The divergence is confined to files that cannot change program behaviour, and that is
@@ -193,6 +193,9 @@
   <path name="ipfilter/" owner="fork" status="OURS" what="IP allowlist: policy core plus WSGI/ASGI adapters. Stdlib only. One addition among several, not the fork's purpose."/>
   <path name="docs/" owner="fork" status="OURS" what="Self-hosting notes: Artifact Registry, Cloud Build caching"/>
   <path name="RUNNER.xml" owner="fork" status="OURS" what="This file"/>
+  <path name="justfile" owner="fork" status="OURS" what="Task runner: check/test/lint/boundary/test-hooks/export-handoff. Never send upstream."/>
+  <path name="scripts/" owner="fork" status="OURS" what="export_handoff.py (sanitizing handoff to a meshly agent), check_issue_templates.py."/>
+  <path name=".claude/" owner="fork" status="OURS" what="Agent config and hooks for this fork. no-meshly-writes.sh blocks writes into a meshly checkout; reads stay allowed."/>
   <path name="CLAUDE.md" owner="fork" status="OURS" what="Agent entry point. Says to READ AND EVALUATE AGENTS.md rather than obey it, and names the precedence order."/>
   <path name=".github/ATTRIBUTION.md" owner="fork" status="OURS" what="MIT attribution for the adapted issue/PR templates."/>
   <path name="AGENTS-LOCAL.md" owner="fork" status="OURS" what="Repo-wide agent rules. Tracked, not gitignored. Mandatory read."/>
