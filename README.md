@@ -79,6 +79,23 @@ does, and `ipfilter/` is **not wired into it** — enabling it is a composition
 step a deployment performs for itself, which is why `app/` does not need to
 move.
 
+## Why we run this at all
+
+Mild version, since it is the honest one: **GitHub's hosted runners are
+expensive at our volume.** [Blacksmith](https://blacksmith.sh) was a genuinely
+usable drop-in replacement — a one-line `runs-on` change and it worked — but
+also too expensive to be the answer. Ephemeral Spot VMs in our own project are
+the next step down in cost.
+
+So **much of what this fork adds is for our own CI/CD**, not a product. That is
+worth stating plainly for two reasons. It tells you what the additions are
+optimised for: cost and predictability, with queueing and delay treated as
+acceptable. And it tells you what they are *not* — none of this is a hosted
+service, a support commitment, or a claim that it will suit your cost profile.
+
+If GitHub-hosted runners are affordable for you, use them. They are less work
+than any of this.
+
 ## How soft is this fork, honestly
 
 "Soft fork" is a gradient, not a badge, and this one has drifted along it. Where
