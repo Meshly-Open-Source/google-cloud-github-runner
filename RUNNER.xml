@@ -29,13 +29,13 @@
   <section name="ai-generated-disclosure" line="44" what="Who wrote the fork's code. READ FIRST."/>
   <section name="contribution-routing" line="70" what="Does your change go here or upstream? Decide BEFORE coding."/>
   <section name="identity" line="111" what="What the project is, and what the fork is"/>
-  <section name="repo-map" line="177" what="Every top-level path, and whether you may touch it"/>
-  <section name="fork-invariants" line="212" what="Hard guarantees about the fork boundary"/>
-  <section name="application-facts" line="267" what="Routes, env vars, runtime shape - read from upstream's code"/>
-  <section name="additions" line="335" what="ipfilter/ and docs/ - the fork's own code"/>
-  <section name="build-and-deploy" line="409" what="Building your own image; the traps"/>
-  <section name="agent-empathy" line="468" what="What agents get wrong in this repo"/>
-  <section name="attestation" line="527" what="What was verified, and what was NOT"/>
+  <section name="repo-map" line="190" what="Every top-level path, and whether you may touch it"/>
+  <section name="fork-invariants" line="225" what="Hard guarantees about the fork boundary"/>
+  <section name="application-facts" line="280" what="Routes, env vars, runtime shape - read from upstream's code"/>
+  <section name="additions" line="348" what="ipfilter/ and docs/ - the fork's own code"/>
+  <section name="build-and-deploy" line="422" what="Building your own image; the traps"/>
+  <section name="agent-empathy" line="481" what="What agents get wrong in this repo"/>
+  <section name="attestation" line="540" what="What was verified, and what was NOT"/>
 </index>
 
 <!-- ═══════════════════════════════════════════════════════════════════════════
@@ -125,6 +125,19 @@
   </project>
   <fork>
     <maintainer>meshly.ai</maintainer>
+    <scope-of-the-invariant note="Read this before quoting byte-identity at anyone.">
+      Byte-identity is a claim about SOURCE FILES, not about the ARTEFACT. We deploy a
+      materially different artefact: a different gunicorn entrypoint (meshly.wsgi:app, not
+      run:app), a WSGI wrapper that runs BEFORE the application's own in-handler signature
+      check, four diverged documentation files, and our own community health files. This
+      package is fundamentally augmented.
+      What the invariant buys is MAINTAINABILITY, not fidelity: an upstream bump is a
+      fast-forward of a pointer rather than a merge, the pointer diff shows what is being
+      accepted before it is accepted, and no patch can apply with fuzz.
+      What it does NOT buy: that the running service behaves as upstream's, that upstream's
+      docs predict our behaviour, or that upstream's tests cover what we deploy. They test
+      app/. NOTHING tests the composed artefact; that gap is ours.
+    </scope-of-the-invariant>
     <softness note="A gradient, not a badge. Keep these counts current -- a stale count is how
                     'we barely touch upstream' survives past the point of being true.">
       <upstream-code-paths-modified>0</upstream-code-paths-modified>

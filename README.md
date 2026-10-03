@@ -71,13 +71,50 @@ accounting.
 That is the complete list, and it is mechanically enforced rather than
 promised — see [below](#the-additions-never-edits-invariant).
 
-**Not changed:** `app/`, `gcp/`, `tools/`, `tests/`, `Dockerfile`,
-`requirements.txt`, `.github/`, and every other path upstream owns. Byte for
-byte. No patch series, no cherry-picks, no behaviour changes, no new runtime
-dependencies. The application in this repository does exactly what upstream's
-does, and `ipfilter/` is **not wired into it** — enabling it is a composition
-step a deployment performs for itself, which is why `app/` does not need to
-move.
+**Not changed as FILES:** `app/`, `gcp/`, `tools/`, `tests/`, `Dockerfile`,
+`requirements.txt`, `.github/workflows/`, and every other path upstream owns.
+Byte for byte. No patch series, no cherry-picks, no new runtime dependencies.
+`ipfilter/` is **not imported by** upstream's tree, which is why `app/` does
+not need to move.
+
+### What byte-identity does NOT mean
+
+It would be easy to read the above as "this behaves like upstream". **It does
+not, and the distinction is worth being exact about**, because the honest
+version is less reassuring than the convenient one.
+
+Byte-identity is a claim about **source files**. It is not a claim about the
+**artefact**, and we deploy a materially different artefact:
+
+| | upstream | what we run |
+|---|---|---|
+| Entrypoint | `gunicorn run:app` | `gunicorn meshly.wsgi:app` — a module of ours |
+| Request path | straight into Flask routing | our WSGI wrapper runs **first**, before the app's own in-handler signature check |
+| Docs a reader sees | upstream's | ours, for four files |
+| Community health files | upstream's | ours, minus `FUNDING.yml` |
+
+So: a **soft fork at the source layer, a derivative product at the artefact
+layer.** We are fundamentally augmenting this package. Pretending otherwise
+because no vendor byte moved would be a true statement arranged to create a
+false impression.
+
+What the invariant actually buys is therefore narrower than it sounds, and it
+is a **maintainability** property rather than a fidelity one:
+
+* an upstream bump is a **fast-forward of a pointer**, not a merge of code we
+  did not write;
+* `git diff` on that pointer shows exactly what we are accepting, before we
+  accept it;
+* there is no patch that can apply **with fuzz** — succeed, mean something
+  different, and fail nothing;
+* our side can be rebuilt on a new upstream without reconciling edits.
+
+What it does **not** buy, stated so nobody relies on it:
+
+* that the running service behaves as upstream's does — see the table;
+* that upstream's documentation predicts our behaviour;
+* that upstream's tests cover what we deploy. They test `app/`. **Nothing
+  tests the composed artefact**, and that gap is ours, not theirs.
 
 ## Why we run this at all
 
@@ -141,8 +178,10 @@ fast-forward instead of a merge of code we did not write. What it specifically
 buys is protection from a patch that applies **with fuzz** — which succeeds,
 and now means something different, and nothing fails and nobody looks.
 
-It also means you can audit this fork without reading a diff. We changed
-nothing; we added directories.
+It also means you can audit this fork's **source** without reading a diff:
+upstream's files are byte-identical, and everything of ours is in a new path.
+Auditing its **behaviour** is a different exercise and needs the table
+[above](#what-byte-identity-does-not-mean) — the artefact is not upstream's.
 
 ### The additions-never-edits invariant
 
