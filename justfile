@@ -99,15 +99,42 @@ boundary:
         echo "  'Nothing differs' is trivially true of nothing." >&2
         exit 2
     fi
-    # Workflows execute with a repository token and are never declarable.
-    workflows=$(echo "$changed" | { grep '^\.github/workflows/' || true; })
-    if [[ -n "$workflows" ]]; then
-        echo "boundary: FINDINGS — .github/workflows/ was modified:" >&2
-        echo "$workflows" | sed 's/^/    /' >&2
-        exit 1
+    # Workflows: our own ADDITIONS are fine, EDITS to upstream's are not.
+    #
+    # The earlier version of this check refused every path under
+    # .github/workflows/, which conflated two different things and cost us the
+    # ability to dogfood. Editing upstream's ci.yml changes what runs on their
+    # code with a repository token and would travel into any PR we send them.
+    # Adding meshly-ci.yml is OUR workflow on OUR code, and upstream's lints
+    # only app/ and tests/ — so without it everything this fork adds has no CI
+    # at all.
+    #
+    # The meshly- prefix is the discriminator: provenance is obvious in a file
+    # listing, and it is trivially excluded from an upstream PR.
+    wf=$(echo "$changed" | { grep '^\.github/workflows/' || true; })
+    if [[ -n "$wf" ]]; then
+        bad=""
+        while IFS= read -r f; do
+            [[ -z "$f" ]] && continue
+            # An ADDED file does not exist in upstream's tree.
+            if git cat-file -e "upstream/master:$f" 2>/dev/null; then
+                bad="$bad$f (edits a workflow upstream owns)\n"
+            elif [[ "$(basename "$f")" != meshly-* ]]; then
+                bad="$bad$f (added, but not named meshly-*.yml)\n"
+            fi
+        done <<< "$wf"
+        if [[ -n "$bad" ]]; then
+            echo "boundary: FINDINGS — workflow changes that are not permitted:" >&2
+            printf "%b" "$bad" | sed 's/^/    /' >&2
+            echo "  Our own workflows must be ADDED as .github/workflows/meshly-*.yml." >&2
+            echo "  Upstream's workflows are never edited — send that change upstream." >&2
+            exit 1
+        fi
+        echo "boundary: note — permitted workflow additions:"
+        echo "$wf" | sed 's/^/    /'
     fi
     # Declared doc divergences, plus the paths the fork owns.
-    allowed='^(README\.md|CONTRIBUTING\.md|SECURITY\.md|AGENTS\.md|CLAUDE\.md|AGENTS-LOCAL\.md|RUNNER\.xml|justfile|ipfilter/|docs/|scripts/|\.claude/|\.github/(ATTRIBUTION\.md|ISSUE_TEMPLATE/|PULL_REQUEST_TEMPLATE\.md|FUNDING\.yml))'
+    allowed='^(README\.md|CONTRIBUTING\.md|SECURITY\.md|AGENTS\.md|CLAUDE\.md|AGENTS-LOCAL\.md|RUNNER\.xml|justfile|ipfilter/|docs/|scripts/|\.claude/|\.github/(ATTRIBUTION\.md|ISSUE_TEMPLATE/|PULL_REQUEST_TEMPLATE\.md|FUNDING\.yml|workflows/meshly-)|CHANGELOG\.md)'
     unexpected=$(echo "$changed" | { grep -Ev "$allowed" || true; })
     if [[ -n "$unexpected" ]]; then
         echo "boundary: FINDINGS — upstream paths changed that the fork does not own:" >&2
